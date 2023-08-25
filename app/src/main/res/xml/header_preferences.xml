@@ -1,0 +1,39 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/settings_title_settings">
+        <SwitchPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="@string/settings_title_show_all_cards"
+            app:key="show_all_cards"
+            app:summaryOff="@string/settings_summary_show_all_cards_off"
+            app:summaryOn="@string/settings_summary_show_all_cards_on" />
+        <Preference
+            app:fragment="com.zhizi42.diymiuicard.SettingsActivity$CustomHookFragment"
+            app:key="messages_header"
+            app:title="@string/settings_title_custom_hook" />
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:title="@string/how_to_use_title"
+            app:key="how_to_use" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/settings_title_about">
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:title="@string/settings_title_about"
+            app:key="about"
+            app:icon="@drawable/ic_info" />
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:title="@string/settings_title_join_qq"
+            app:key="join_qq" />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
