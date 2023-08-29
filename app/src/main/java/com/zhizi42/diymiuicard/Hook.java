@@ -2,15 +2,12 @@ package com.zhizi42.diymiuicard;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -19,7 +16,6 @@ import java.util.Set;
 import dalvik.system.DexClassLoader;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -27,7 +23,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import static android.content.Context.MODE_PRIVATE;
 
 import androidx.annotation.Keep;
-import androidx.preference.PreferenceManager;
 
 @Keep
 public class Hook implements IXposedHookLoadPackage {
@@ -62,7 +57,7 @@ public class Hook implements IXposedHookLoadPackage {
                 }
                 MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
                 SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(context, "settings", MODE_PRIVATE);
-                File file = new File("/data/data/com.zhizi42.tsmclient/files/images");
+                File file = new File("/data/data/com.miui.tsmclient/files/images");
                 if (! file.exists()) {
                     file.mkdir();
                 }
@@ -123,7 +118,7 @@ public class Hook implements IXposedHookLoadPackage {
         MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
         SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(context, "settings", MODE_PRIVATE);
         SharedPreferences sharedPreferencesSettings = MultiprocessSharedPreferences
-                .getSharedPreferences(context, "com.zhizi42.diymiuicard_preferences", MODE_PRIVATE);
+                .getSharedPreferences(context, "com.miui.diymiuicard_preferences", MODE_PRIVATE);
         String className = sharedPreferencesSettings.getString("class", "");
         String methodName = sharedPreferencesSettings.getString("method", "");
         if (! className.equals("")) {
@@ -143,6 +138,7 @@ public class Hook implements IXposedHookLoadPackage {
                 }
                 String url = (String) param.args[0];
                 boolean showAllCard = sharedPreferencesSettings.getBoolean("show_all_cards", false);
+                boolean debug = sharedPreferencesSettings.getBoolean("debug", false);
                 if (showAllCard) {
                     cardUrlList.add(url);
                 } else {
@@ -152,14 +148,31 @@ public class Hook implements IXposedHookLoadPackage {
                 }
                 updateCardUrlList(sharedPreferences);
                 String imageName = sharedPreferences.getString(url, "");
+                if (debug) {
+                    XposedBridge.log("zhizi42's diy card: url:" + url);
+                    XposedBridge.log("zhizi42's diy card: image name:" + imageName);
+                }
                 if (! imageName.equals("")) {
-                    String urlNew;
-                    if (!imageName.startsWith("https://") || imageName.startsWith("http://")) {
-                        urlNew = "file:///data/data/com.miui.tsmclient/files/images/" + imageName;
+                    String imageUrl;
+                    if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
+                        imageUrl = imageName;
                     } else {
-                        urlNew = imageName;
+                        String imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
+                        imageUrl = "file://" + imagePath;
+                        if (debug) {
+                            File file = new File(imagePath);
+                            if (file.exists()) {
+                                XposedBridge.log("file exist");
+                            } else {
+                                XposedBridge.log("file not exist");
+                            }
+                        }
                     }
-                    param.setResult(urlNew);
+                    param.setResult(imageUrl);
+                } else {
+                    if (debug) {
+                        XposedBridge.log("zhizi42's diy card: no image");
+                    }
                 }
             }
         });

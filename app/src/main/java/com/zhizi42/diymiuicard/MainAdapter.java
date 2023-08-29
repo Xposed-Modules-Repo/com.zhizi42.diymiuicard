@@ -1,9 +1,10 @@
 package com.zhizi42.diymiuicard;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -18,18 +19,21 @@ import com.zhizi42.diymiuicard.databinding.ItemMainCardBinding;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     ArrayList<String> cardUrlList;
     Context context;
 
-    MainAdapter(ArrayList<String> cardUrlList, Context context) {
-        this.cardUrlList = cardUrlList;
+    MainAdapter(Context context) {
         this.context = context;
     }
 
     public void setList(ArrayList<String> cardUrlList) {
+        SharedPreferences sharedPreferences =
+                context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        cardUrlList.sort(new CustomComparator(sharedPreferences));
         this.cardUrlList = cardUrlList;
     }
 
@@ -76,22 +80,31 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             new AlertDialog.Builder(context)
                     .setTitle(R.string.card_url_title)
                     .setMessage(cardUrl)
+                    .setNeutralButton(R.string.dialog_button_copy, (dialog, which) -> {
+                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                        if (clipboard != null) {
+                            ClipData clipData = ClipData.newPlainText("image url", cardUrl);
+                            clipboard.setPrimaryClip(clipData);
+                        }
+                    })
                     .setPositiveButton(R.string.confirm, null)
                     .show();
         });
 
         mainViewHolder.imageViewImage.setOnClickListener(v -> {
             ImageInputDialogBinding binding = ImageInputDialogBinding.inflate(LayoutInflater.from(context));
+            binding.editTextText.setText(sharedPreferences.getString(cardUrl, ""));
 
             new AlertDialog.Builder(context)
                     .setTitle(R.string.input_image_name_title)
                     .setView(binding.getRoot())
+                    .setNegativeButton(R.string.input_image_button_clear, ((dialog, which) -> {
+                        sharedPreferences.edit().remove(cardUrl).apply();
+                        notifyItemChanged(position);
+                    }))
                     .setPositiveButton(R.string.confirm, (dialog, which) -> {
                         String imageName0 = binding.editTextText.getText().toString();
-                        context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-                                .edit()
-                                .putString(cardUrl, imageName0)
-                                .apply();
+                        sharedPreferences.edit().putString(cardUrl, imageName0).apply();
                         notifyItemChanged(position);
                     })
                     .show();
@@ -116,5 +129,32 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemCount() {
         return cardUrlList.size();
+    }
+
+    static class CustomComparator implements Comparator<String> {
+        private final SharedPreferences sharedPreferences;
+
+        public CustomComparator(SharedPreferences sharedPreferences) {
+            this.sharedPreferences = sharedPreferences;
+        }
+
+        @Override
+        public int compare(String s1, String s2) {
+            boolean isFirstGroup1 = isFirstGroup(s1); // 判断第一组
+            boolean isFirstGroup2 = isFirstGroup(s2);
+
+            if (isFirstGroup1 && !isFirstGroup2) {
+                return -1; // s1 在前
+            } else if (!isFirstGroup1 && isFirstGroup2) {
+                return 1; // s2 在前
+            } else {
+                // 同组按字母顺序排序
+                return s1.compareTo(s2);
+            }
+        }
+
+        private boolean isFirstGroup(String s) {
+            return ! sharedPreferences.getString(s, "").equals("");
+        }
     }
 }

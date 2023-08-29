@@ -6,7 +6,7 @@
     <string name="confirm">confirm</string>
     <string name="confirm_delete_msg">confirm delete all card and image information?</string>
     <string name="cancel">cancel</string>
-    <string name="how_to_use_msg">Usage: After the module is enabled (the text changes to Hello XPosed), check the recommended system framework and Xiaomi smart card scope, restart the phone, open the application, and then open the card package in the settings. When you see the image that needs to be replaced, go back to the application dropdown to refresh. After the target image appears, click on the image to the right of the arrow, enter the file name of the image to be replaced, open the file manager (such as mt file manager), and grant root permission, Copy the image to be replaced to /data/data/com.zhizi42.diymiuicard/files/images/ and /data/data/com.miui.tsmclient/files/images/(And modify the permissions to be readable by anyone), and reopen the card package. At this point, the image should have changed.</string>
+    <string name="how_to_use_msg">Usage: 1. Enable module 2. Open the card package in the settings and see the image that needs to be replaced 3. Return to the application dropdown to refresh 4. After the target image appears, click on the image to the right of the arrow and enter the file name where you want to replace the image 5. Open a file manager (such as the mt file manager) and grant root permission to copy the image to be replaced to/data/data/com. zhizi42. diymiuicard/files/images/and/data/data/com. mii. tsmclient/files/images/, and modify the permissions to be readable by anyone 6. Reopen the card package, and the image should have changed by now.</string>
     <string name="how_to_use_title">How to use</string>
     <string name="card_url_title">Card URL</string>
     <string name="input_image_name_title">Input image name or URL</string>
@@ -18,6 +18,10 @@
     <string name="settings_summary_show_all_cards_on">Don\'t filter small cards and logos now</string>
     <string name="settings_summary_show_all_cards_off">Now filter the small cards and logos</string>
     <string name="settings_title_custom_hook">Custom hook class and mathod</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.0,code by zhizi42(AI丿质子)</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.1,code by zhizi42(AI丿质子)</string>
     <string name="settings_title_join_qq">Join author\'s qq group</string>
+    <string name="settings_title_debug">print log</string>
+    <string name="settings_summary_debug">only use for debug</string>
+    <string name="dialog_button_copy">copy</string>
+    <string name="input_image_button_clear">Clear</string>
 </resources>

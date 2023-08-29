@@ -5,7 +5,7 @@
     <string name="confirm">确认</string>
     <string name="confirm_delete_msg">确认删除所有卡片和图片信息吗？</string>
     <string name="cancel">取消</string>
-    <string name="how_to_use_msg">使用方法：模块启用后（文字变为Hello XPosed）作用域勾选推荐的系统框架和小米智能卡，重启手机，打开应用后再打开设置里的卡包，看到需要更换的图像后回到应用下拉刷新，出现目标图像后点击箭头右边的图像，输入要更换图像的文件名，打开文件管理器（如mt文件管理器）授予root权限，把要更换的图像复制到/data/data/com.zhizi42.diymiuicard/files/images/和/data/data/com.miui.tsmclient/files/images/下（并修改权限为任何人可读取），重新打开卡包，此时图像应已经变化。</string>
+    <string name="how_to_use_msg">使用方法：\n1.启用模块\n2.打开设置里的卡包，看到需要更换的图像\n3.回到应用下拉刷新\n4.出现目标图像后点击箭头右边的图像，输入要更换图像的文件名\n5.打开文件管理器（如mt文件管理器）授予root权限，把要更换的图像复制到/data/data/com.zhizi42.diymiuicard/files/images/\n和\n/data/data/com.miui.tsmclient/files/images/下，并修改权限为任何人可读取\n6.重新打开卡包，此时图像应已经变化。</string>
     <string name="how_to_use_title">使用说明</string>
     <string name="card_url_title">卡片网址</string>
     <string name="input_image_name_title">输入图片名字或url</string>
@@ -17,18 +17,10 @@
     <string name="settings_summary_show_all_cards_on">现在不过滤小卡片和logo</string>
     <string name="settings_summary_show_all_cards_off">现在过滤小卡片和logo</string>
     <string name="settings_title_custom_hook">自定义hook点（仅供测试使用，不懂勿动）</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.0，code by AI丿质子</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.1，code by AI丿质子</string>
     <string name="settings_title_join_qq">加入作者的QQ群</string>
-
-    <!-- Preference Titles -->
-
-    <!-- Messages Preferences -->
-
-    <!-- Sync Preferences -->
-
-    <!-- Preference Titles -->
-
-    <!-- Messages Preferences -->
-
-    <!-- Sync Preferences -->
+    <string name="settings_title_debug">输出log</string>
+    <string name="settings_summary_debug">仅供debug使用</string>
+    <string name="dialog_button_copy">复制</string>
+    <string name="input_image_button_clear">清空</string>
 </resources>

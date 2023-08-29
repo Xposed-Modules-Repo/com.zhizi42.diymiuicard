@@ -1,3 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">DIY MIUI NFC卡面</string>
+    <string name="text_disable">已禁用</string>
+    <string name="text_enable">你好，XPosed</string>
+    <string name="confirm">確認</string>
+    <string name="confirm_delete_msg">確認刪除所有卡片和圖片信息嗎？</string>
+    <string name="cancel">取消</string>
+    <string name="how_to_use_msg">使用方法：\n1.啟用模塊\n2.打開設置裏的卡包，看到需要更換的圖像\n3.回到應用下拉刷新\n4.出現目標圖像後點擊箭頭右邊的圖像，輸入要更換圖像的文件名\n5.打開文件管理器（如mt文件管理器）授予root權限，把要更換的圖像複製到/data/data/com.zhizi42.diymiuicard/files/images/\n和\n/data/data/com.miui.tsmclient/files/images/下，並修改權限為任何人可讀取\n6.重新打開卡包，此時圖像應已經變化。</string>
+    <string name="how_to_use_title">使用説明</string>
+    <string name="card_url_title">卡片網址</string>
+    <string name="input_image_name_title">輸入圖片名字或url</string>
+    <string name="input_image_input_hint">圖片名字</string>
+    <string name="title_activity_settings">設置</string>
+    <string name="settings_title_settings">設置</string>
+    <string name="settings_title_about">關於</string>
+    <string name="settings_title_show_all_cards">顯示所有卡片</string>
+    <string name="settings_summary_show_all_cards_on">現在不過濾小卡片和logo</string>
+    <string name="settings_summary_show_all_cards_off">現在過濾小卡片和logo</string>
+    <string name="settings_title_custom_hook">自定義hook點（僅供測試使用，不懂勿動）</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.1，code by AI丿質子</string>
+    <string name="settings_title_join_qq">加入作者的QQ羣</string>
+    <string name="settings_title_debug">輸出log</string>
+    <string name="settings_summary_debug">僅供debug使用</string>
+    <string name="dialog_button_copy">複製</string>
+    <string name="input_image_button_clear">清空</string>
 </resources>

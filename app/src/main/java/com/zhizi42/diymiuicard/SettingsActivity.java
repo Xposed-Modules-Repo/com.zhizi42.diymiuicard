@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -129,6 +130,7 @@ public class SettingsActivity extends AppCompatActivity implements
         }
     }
 
+    @Keep
     public static class CustomHookFragment extends PreferenceFragmentCompat {
 
         @Override

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 
 import com.zhizi42.diymiuicard.databinding.ActivityMainBinding;
 
@@ -38,36 +39,18 @@ public class MainActivity extends AppCompatActivity {
             howToUse();
             sharedPreferences.edit().putBoolean("first_run", false).apply();
         }
-        Set<String> cardUrlSet = sharedPreferences.getStringSet("all_card_url_set", new HashSet<>());
-        ArrayList<String> cardUrlList = new ArrayList<>(cardUrlSet);
 
         RecyclerView recyclerView = binding.recyclerView;
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new MainAdapter(cardUrlList, this);
+        adapter = new MainAdapter(this);
+        refreshList();
         recyclerView.setAdapter(adapter);
 
         binding.swipeRefreshLayout.setOnRefreshListener(() -> {
             refreshList();
             binding.swipeRefreshLayout.setRefreshing(false);
-        });
-
-        binding.imageButtonSettings.setOnClickListener(v -> {
-            startActivity(new Intent(this, SettingsActivity.class));
-        });
-        binding.imageButtonDelete.setOnClickListener(v -> {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.confirm)
-                    .setMessage(R.string.confirm_delete_msg)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.remove("all_card_url_set");
-                        editor.apply();
-                        refreshList();
-                    })
-                    .show();
         });
 
         MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
@@ -88,6 +71,24 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(R.string.how_to_use_title)
                 .setMessage(R.string.how_to_use_msg)
                 .setPositiveButton(R.string.confirm, null)
+                .show();
+    }
+
+    public void onSettingClick(View view) {
+        startActivity(new Intent(this, SettingsActivity.class));
+    }
+
+    public void onDeleteClick(View view) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.confirm)
+                .setMessage(R.string.confirm_delete_msg)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove("all_card_url_set");
+                    editor.apply();
+                    refreshList();
+                })
                 .show();
     }
 
