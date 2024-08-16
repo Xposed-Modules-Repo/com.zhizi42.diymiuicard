@@ -101,7 +101,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     } else {
                         setAppIconHide(false);
                     }
-                    return false;
+                    return true;
                 });
             }
 
@@ -113,7 +113,7 @@ public class SettingsActivity extends AppCompatActivity implements
                             .setMessage(R.string.settings_about_msg)
                             .setPositiveButton(R.string.confirm, null)
                             .show();
-                    return false;
+                    return true;
                 });
             }
 
@@ -126,7 +126,7 @@ public class SettingsActivity extends AppCompatActivity implements
                                 Snackbar.LENGTH_LONG)
                                 .show();
                     }
-                    return false;
+                    return true;
                 });
             }
 
@@ -138,7 +138,7 @@ public class SettingsActivity extends AppCompatActivity implements
                         .setMessage(R.string.how_to_use_msg)
                         .setPositiveButton(R.string.confirm, null)
                         .show();
-                    return false;
+                    return true;
                 });
             }
 
@@ -146,7 +146,7 @@ public class SettingsActivity extends AppCompatActivity implements
             if (donatePreference != null) {
                 donatePreference.setOnPreferenceClickListener(preference -> {
                     startActivity(new Intent(requireContext(), DonateActivity.class));
-                    return false;
+                    return true;
                 });
             }
 
@@ -162,7 +162,7 @@ public class SettingsActivity extends AppCompatActivity implements
                             })
                             .setPositiveButton(R.string.confirm, null)
                             .show();
-                    return false;
+                    return true;
                 });
             }
         }
