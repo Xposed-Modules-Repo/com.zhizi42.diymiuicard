@@ -11,6 +11,12 @@
             app:summaryOff="@string/settings_summary_show_all_cards_off"
             app:summaryOn="@string/settings_summary_show_all_cards_on" />
         <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/settings_title_hide_icon"
+            app:icon="@drawable/ic_hide_image"
+            app:key="hide_icon"
+            app:summary="@string/settings_summary_hide_icon" />
+        <SwitchPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="false"
@@ -26,6 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:title="@string/how_to_use_title"
+            app:icon="@drawable/ic_question"
             app:key="how_to_use" />
     </PreferenceCategory>
 
@@ -41,6 +48,18 @@
             android:layout_height="wrap_content"
             android:title="@string/settings_title_join_qq"
             app:key="join_qq" />
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:title="@string/settings_title_donate"
+            app:icon="@drawable/ic_coffee"
+            app:key="donate" />
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:title="@string/settings_title_no_money_plan"
+            app:icon="@drawable/ic_money_off"
+            app:key="no_money" />
     </PreferenceCategory>
 
 

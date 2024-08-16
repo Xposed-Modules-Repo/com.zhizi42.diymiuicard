@@ -1,18 +1,21 @@
 package com.zhizi42.diymiuicard;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreference;
+
+import com.google.android.material.snackbar.Snackbar;
 
 public class SettingsActivity extends AppCompatActivity implements
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -82,6 +85,26 @@ public class SettingsActivity extends AppCompatActivity implements
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.header_preferences, rootKey);
 
+            SwitchPreference hideIconPreference = findPreference("hide_icon");
+            if (hideIconPreference != null) {
+                hideIconPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    boolean hide = (boolean) newValue;
+                    if (hide) {
+                        new AlertDialog.Builder(requireContext())
+                                .setTitle(R.string.settings_hide_icon_dialog_title)
+                                .setMessage(R.string.settings_hide_icon_dialog_text)
+                                .setNegativeButton(R.string.cancel, null)
+                                .setPositiveButton(R.string.confirm, (dialogInterface, i) -> {
+                                    setAppIconHide(true);
+                                })
+                                .show();
+                    } else {
+                        setAppIconHide(false);
+                    }
+                    return false;
+                });
+            }
+
             Preference aboutPreference = findPreference("about");
             if (aboutPreference != null) {
                 aboutPreference.setOnPreferenceClickListener(preference -> {
@@ -94,17 +117,22 @@ public class SettingsActivity extends AppCompatActivity implements
                 });
             }
 
-            Preference qqPrefrence = findPreference("join_qq");
-            if (qqPrefrence != null) {
-                qqPrefrence.setOnPreferenceClickListener(preference -> {
-                    joinQQGroup("5jcvi8iIuZuQVqm4HZXlVhxoMQ1RLVtF");
+            Preference qqPreference = findPreference("join_qq");
+            if (qqPreference != null) {
+                qqPreference.setOnPreferenceClickListener(preference -> {
+                    if (! joinQQGroup("5jcvi8iIuZuQVqm4HZXlVhxoMQ1RLVtF")) {
+                        Snackbar.make(requireView(),
+                                R.string.settings_open_qq_fail,
+                                Snackbar.LENGTH_LONG)
+                                .show();
+                    }
                     return false;
                 });
             }
 
-            Preference howToUsePrefrnce = findPreference("how_to_use");
-            if (howToUsePrefrnce != null) {
-                howToUsePrefrnce.setOnPreferenceClickListener(preference -> {
+            Preference howToUsePreference = findPreference("how_to_use");
+            if (howToUsePreference != null) {
+                howToUsePreference.setOnPreferenceClickListener(preference -> {
                     new AlertDialog.Builder(requireContext())
                         .setTitle(R.string.how_to_use_title)
                         .setMessage(R.string.how_to_use_msg)
@@ -112,7 +140,30 @@ public class SettingsActivity extends AppCompatActivity implements
                         .show();
                     return false;
                 });
+            }
 
+            Preference donatePreference = findPreference("donate");
+            if (donatePreference != null) {
+                donatePreference.setOnPreferenceClickListener(preference -> {
+                    startActivity(new Intent(requireContext(), DonateActivity.class));
+                    return false;
+                });
+            }
+
+            Preference noMoneyPlanPreference = findPreference("no_money");
+            if (noMoneyPlanPreference != null) {
+                noMoneyPlanPreference.setOnPreferenceClickListener(preference -> {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.settings_title_no_money_plan)
+                            .setMessage(R.string.dialog_text_no_money)
+                            .setNegativeButton(R.string.dialog_button_text_no_money_link, (dialogInterface, i) -> {
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NoMoneyPlan"));
+                                startActivity(intent);
+                            })
+                            .setPositiveButton(R.string.confirm, null)
+                            .show();
+                    return false;
+                });
             }
         }
 
@@ -128,6 +179,20 @@ public class SettingsActivity extends AppCompatActivity implements
                 return false;
             }
         }
+
+        public void setAppIconHide(boolean hide) {
+            PackageManager pm = requireActivity().getPackageManager();
+            ComponentName componentName = new ComponentName(requireActivity(), "com.zhizi42.diymiuicard.StartMainActivity");
+
+            int newState = hide ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED :
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
+            pm.setComponentEnabledSetting(
+                    componentName,
+                    newState,
+                    PackageManager.DONT_KILL_APP);
+        }
+
     }
 
     @Keep

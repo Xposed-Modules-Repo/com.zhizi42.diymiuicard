@@ -1,6 +1,6 @@
 package com.zhizi42.diymiuicard;
 
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -11,7 +11,9 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
 import com.zhizi42.diymiuicard.databinding.ImageInputDialogBinding;
@@ -57,7 +59,7 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         SharedPreferences sharedPreferences =
                 context.getSharedPreferences("settings", Context.MODE_PRIVATE);
         String imageName = sharedPreferences.getString(cardUrl, "");
-        if (! imageName.equals("")) {
+        if (!imageName.isEmpty()) {
             if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
                 Glide.with(context)
                         .load(imageName)
@@ -65,7 +67,7 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         .error(R.drawable.ic_error)
                         .into(mainViewHolder.imageViewImage);
             } else {
-                String path = "/data/data/com.zhizi42.diymiuicard/files/images/" + imageName;
+                @SuppressLint("SdCardPath") String path = "/data/data/com.zhizi42.diymiuicard/files/images/" + imageName;
                 Glide.with(context)
                         .load(new File(path))
                         .placeholder(R.drawable.ic_image)
@@ -76,28 +78,25 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mainViewHolder.imageViewImage.setImageResource(R.drawable.ic_image);
         }
 
-        mainViewHolder.imageViewCard.setOnClickListener(v -> {
-            new AlertDialog.Builder(context)
-                    .setTitle(R.string.card_url_title)
-                    .setMessage(cardUrl)
-                    .setNeutralButton(R.string.dialog_button_copy, (dialog, which) -> {
-                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                        if (clipboard != null) {
-                            ClipData clipData = ClipData.newPlainText("image url", cardUrl);
-                            clipboard.setPrimaryClip(clipData);
-                        }
-                    })
-                    .setPositiveButton(R.string.confirm, null)
-                    .show();
-        });
+        mainViewHolder.imageViewCard.setOnClickListener(v -> new AlertDialog.Builder(context)
+                .setTitle(R.string.card_url_title)
+                .setMessage(cardUrl)
+                .setNeutralButton(R.string.dialog_button_copy, (dialog, which) -> {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (clipboard != null) {
+                        ClipData clipData = ClipData.newPlainText("image url", cardUrl);
+                        clipboard.setPrimaryClip(clipData);
+                    }
+                })
+                .setPositiveButton(R.string.confirm, null)
+                .show());
 
         mainViewHolder.imageViewImage.setOnClickListener(v -> {
             ImageInputDialogBinding binding = ImageInputDialogBinding.inflate(LayoutInflater.from(context));
-            binding.editTextText.setText(sharedPreferences.getString(cardUrl, ""));
-
-            new AlertDialog.Builder(context)
+            AlertDialog alertDialog = new AlertDialog.Builder(context)
                     .setTitle(R.string.input_image_name_title)
                     .setView(binding.getRoot())
+                    .setNeutralButton(R.string.input_image_button_tips_title, null)
                     .setNegativeButton(R.string.input_image_button_clear, ((dialog, which) -> {
                         sharedPreferences.edit().remove(cardUrl).apply();
                         notifyItemChanged(position);
@@ -107,7 +106,29 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         sharedPreferences.edit().putString(cardUrl, imageName0).apply();
                         notifyItemChanged(position);
                     })
-                    .show();
+                    .create();
+
+
+            RecyclerView recyclerView = binding.recyclerViewMyImages;
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            recyclerView.setLayoutManager(linearLayoutManager);
+            MyImagesAdapter adapter = new MyImagesAdapter(context, cardUrl, name -> {
+                sharedPreferences.edit().putString(cardUrl, name).apply();
+                alertDialog.dismiss();
+                notifyItemChanged(position);
+            });
+            recyclerView.setAdapter(adapter);
+            binding.imageButtonAdd.setOnClickListener(view -> ((MainActivity)context).selectImageAdd(adapter));
+            binding.editTextText.setText(sharedPreferences.getString(cardUrl, ""));
+
+            alertDialog.show();
+            alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                    .setOnClickListener(view -> new AlertDialog.Builder(context)
+                            .setTitle(R.string.input_image_button_tips_title)
+                            .setMessage(R.string.input_image_tips_text)
+                            .setPositiveButton(R.string.confirm, null)
+                            .show());
         });
     }
 
@@ -154,7 +175,7 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private boolean isFirstGroup(String s) {
-            return ! sharedPreferences.getString(s, "").equals("");
+            return !sharedPreferences.getString(s, "").isEmpty();
         }
     }
 }

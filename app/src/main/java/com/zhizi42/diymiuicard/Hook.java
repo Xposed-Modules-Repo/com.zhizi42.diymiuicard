@@ -1,5 +1,6 @@
 package com.zhizi42.diymiuicard;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -57,7 +58,7 @@ public class Hook implements IXposedHookLoadPackage {
                 }
                 MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
                 SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(context, "settings", MODE_PRIVATE);
-                File file = new File("/data/data/com.miui.tsmclient/files/images");
+                @SuppressLint("SdCardPath") File file = new File("/data/data/com.miui.tsmclient/files/images");
                 if (! file.exists()) {
                     file.mkdir();
                 }
@@ -121,10 +122,10 @@ public class Hook implements IXposedHookLoadPackage {
                 .getSharedPreferences(context, "com.miui.diymiuicard_preferences", MODE_PRIVATE);
         String className = sharedPreferencesSettings.getString("class", "");
         String methodName = sharedPreferencesSettings.getString("method", "");
-        if (! className.equals("")) {
+        if (!className.isEmpty()) {
             targetClassName = className;
         }
-        if (! methodName.equals("")) {
+        if (!methodName.isEmpty()) {
             targetMethodName = methodName;
         }
 
@@ -152,12 +153,12 @@ public class Hook implements IXposedHookLoadPackage {
                     XposedBridge.log("zhizi42's diy card: url:" + url);
                     XposedBridge.log("zhizi42's diy card: image name:" + imageName);
                 }
-                if (! imageName.equals("")) {
+                if (!imageName.isEmpty()) {
                     String imageUrl;
                     if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
                         imageUrl = imageName;
                     } else {
-                        String imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
+                        @SuppressLint("SdCardPath") String imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
                         imageUrl = "file://" + imagePath;
                         if (debug) {
                             File file = new File(imagePath);
