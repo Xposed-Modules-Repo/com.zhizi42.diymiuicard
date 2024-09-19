@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity implements
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -47,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save current activity title so we can set it again after a configuration change
         outState.putCharSequence(TITLE_TAG, getTitle());
@@ -62,14 +65,14 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref) {
+    public boolean onPreferenceStartFragment(@NonNull PreferenceFragmentCompat caller, Preference pref) {
         // Instantiate the new Fragment
         final Bundle args = pref.getExtras();
         final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
                 getClassLoader(),
-                pref.getFragment());
+                Objects.requireNonNull(pref.getFragment()));
         fragment.setArguments(args);
-        fragment.setTargetFragment(caller, 0);
+        //fragment.setTargetFragment(caller, 0);
         // Replace the existing Fragment with the new Fragment
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.settings, fragment)
@@ -94,9 +97,7 @@ public class SettingsActivity extends AppCompatActivity implements
                                 .setTitle(R.string.settings_hide_icon_dialog_title)
                                 .setMessage(R.string.settings_hide_icon_dialog_text)
                                 .setNegativeButton(R.string.cancel, null)
-                                .setPositiveButton(R.string.confirm, (dialogInterface, i) -> {
-                                    setAppIconHide(true);
-                                })
+                                .setPositiveButton(R.string.confirm, (dialogInterface, i) -> setAppIconHide(true))
                                 .show();
                     } else {
                         setAppIconHide(false);

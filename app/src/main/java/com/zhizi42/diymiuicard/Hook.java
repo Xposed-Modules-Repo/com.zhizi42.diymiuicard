@@ -29,7 +29,8 @@ import androidx.annotation.Keep;
 public class Hook implements IXposedHookLoadPackage {
 
     public static ArrayList<String> cardUrlList = new ArrayList<>();
-    public Context context;
+    private Context context;
+    private boolean isDebug = true;
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
@@ -53,16 +54,19 @@ public class Hook implements IXposedHookLoadPackage {
                 super.afterHookedMethod(param);
                 context = (Context) param.args[0];
                 if (context == null) {
-                    XposedBridge.log("attach context is null");
+                    XposedBridge.log("zhizi42's diy miui card: attach context is null");
                     return;
                 }
                 MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
-                SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(context, "settings", MODE_PRIVATE);
+                SharedPreferences sharedPreferencesSettings = MultiprocessSharedPreferences
+                        .getSharedPreferences(context, "com.zhizi42.diymiuicard_preferences", MODE_PRIVATE);
+                isDebug = sharedPreferencesSettings.getBoolean("debug", false);
+                SharedPreferences sharedPreferences = MultiprocessSharedPreferences
+                        .getSharedPreferences(context, "settings", MODE_PRIVATE);
                 @SuppressLint("SdCardPath") File file = new File("/data/data/com.miui.tsmclient/files/images");
                 if (! file.exists()) {
                     file.mkdir();
                 }
-
                 String targetClassName = sharedPreferences.getString("target_class_name", "com.miui.tsmclient.util.z");
                 String targetMethodName = sharedPreferences.getString("target_method_name", "i");
                 try {
@@ -97,7 +101,12 @@ public class Hook implements IXposedHookLoadPackage {
                                             targetClassName = className;
                                             targetMethodName = method.getName();
                                             updateTargetHookName(sharedPreferences, targetClassName, targetMethodName);
-                                            hookTarget(targetClassName, targetMethodName, loadPackageParam);
+                                            try {
+                                                hookTarget(targetClassName, targetMethodName, loadPackageParam);
+                                            } catch (NoSuchMethodError error)  {
+                                                XposedBridge.log(
+                                                        "zhizi42's diy miui card: hook load image method error: no such method, after positioning target method. message:" + error.toString());
+                                            }
                                         }
                                     }
                                 }
@@ -107,9 +116,6 @@ public class Hook implements IXposedHookLoadPackage {
                         XposedBridge.log("hook error:" + e0);
                     }
                 }
-
-
-
             }
         });
     }
@@ -117,9 +123,10 @@ public class Hook implements IXposedHookLoadPackage {
     public void hookTarget(String targetClassName, String targetMethodName,
                            XC_LoadPackage.LoadPackageParam loadPackageParam) {
         MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
-        SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(context, "settings", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = MultiprocessSharedPreferences
+                .getSharedPreferences(context, "settings", MODE_PRIVATE);
         SharedPreferences sharedPreferencesSettings = MultiprocessSharedPreferences
-                .getSharedPreferences(context, "com.miui.diymiuicard_preferences", MODE_PRIVATE);
+                .getSharedPreferences(context, "com.zhizi42.diymiuicard_preferences", MODE_PRIVATE);
         String className = sharedPreferencesSettings.getString("class", "");
         String methodName = sharedPreferencesSettings.getString("method", "");
         if (!className.isEmpty()) {
@@ -134,12 +141,9 @@ public class Hook implements IXposedHookLoadPackage {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.afterHookedMethod(param);
-                if (context == null) {
-                    XposedBridge.log("hook target context is null");
-                }
                 String url = (String) param.args[0];
+                debugLog("zhizi42's diy miui card: load image's url:" + url);
                 boolean showAllCard = sharedPreferencesSettings.getBoolean("show_all_cards", false);
-                boolean debug = sharedPreferencesSettings.getBoolean("debug", false);
                 if (showAllCard) {
                     cardUrlList.add(url);
                 } else {
@@ -149,10 +153,7 @@ public class Hook implements IXposedHookLoadPackage {
                 }
                 updateCardUrlList(sharedPreferences);
                 String imageName = sharedPreferences.getString(url, "");
-                if (debug) {
-                    XposedBridge.log("zhizi42's diy card: url:" + url);
-                    XposedBridge.log("zhizi42's diy card: image name:" + imageName);
-                }
+                debugLog("zhizi42's diy miui card: load image's diy image name:" + imageName);
                 if (!imageName.isEmpty()) {
                     String imageUrl;
                     if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
@@ -160,20 +161,18 @@ public class Hook implements IXposedHookLoadPackage {
                     } else {
                         @SuppressLint("SdCardPath") String imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
                         imageUrl = "file://" + imagePath;
-                        if (debug) {
+                        if (isDebug) {
                             File file = new File(imagePath);
                             if (file.exists()) {
-                                XposedBridge.log("file exist");
+                                debugLog("zhizi42's diy miui card: diy image file exist");
                             } else {
-                                XposedBridge.log("file not exist");
+                                debugLog("zhizi42's diy miui card: diy image file not exist");
                             }
                         }
                     }
                     param.setResult(imageUrl);
                 } else {
-                    if (debug) {
-                        XposedBridge.log("zhizi42's diy card: no image");
-                    }
+                    debugLog("zhizi42's diy miui card: load image's not have diy image");
                 }
             }
         });
@@ -193,6 +192,12 @@ public class Hook implements IXposedHookLoadPackage {
             cardUrlSet.addAll(sharedPreferences.getStringSet("all_card_url_set", new HashSet<>()));
             editor.putStringSet("all_card_url_set", cardUrlSet);
             editor.apply();
+        }
+    }
+
+    public void debugLog(String s) {
+        if (isDebug) {
+            XposedBridge.log(s);
         }
     }
 }

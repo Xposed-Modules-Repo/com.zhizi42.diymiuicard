@@ -18,7 +18,7 @@
     <string name="settings_summary_show_all_cards_on">Don\'t filter small cards and logos now</string>
     <string name="settings_summary_show_all_cards_off">Now will filter the small cards and logos</string>
     <string name="settings_title_custom_hook">Custom hook class and mathod</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.1,code by zhizi42(AI丿质子)</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.3.1,code by zhizi42(AI丿质子)</string>
     <string name="settings_title_join_qq">Join author\'s qq group</string>
     <string name="settings_title_debug">print log</string>
     <string name="settings_summary_debug">only use for debug</string>

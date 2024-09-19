@@ -103,6 +103,13 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }))
                     .setPositiveButton(R.string.confirm, (dialog, which) -> {
                         String imageName0 = binding.editTextText.getText().toString();
+
+                        //将军的恩情还不完
+                        if (imageName0.equals("rechrd what")) {
+                            mainViewHolder.imageViewImage.setImageResource(R.drawable.general);
+                            return;
+                        }
+
                         sharedPreferences.edit().putString(cardUrl, imageName0).apply();
                         notifyItemChanged(position);
                     })

@@ -17,7 +17,7 @@
     <string name="settings_summary_show_all_cards_on">现在不过滤小卡片和logo</string>
     <string name="settings_summary_show_all_cards_off">现在会过滤小卡片和logo</string>
     <string name="settings_title_custom_hook">自定义hook点（仅供测试使用，不懂勿动）</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.1，code by AI丿质子</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.3.1，code by AI丿质子</string>
     <string name="settings_title_join_qq">加入作者的QQ群</string>
     <string name="settings_title_debug">输出log</string>
     <string name="settings_summary_debug">仅供debug使用</string>
