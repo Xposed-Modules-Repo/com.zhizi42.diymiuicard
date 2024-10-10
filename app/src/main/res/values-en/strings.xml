@@ -18,7 +18,7 @@
     <string name="settings_summary_show_all_cards_on">Don\'t filter small cards and logos now</string>
     <string name="settings_summary_show_all_cards_off">Now will filter the small cards and logos</string>
     <string name="settings_title_custom_hook">Custom hook class and mathod</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.3.1,code by zhizi42(AI丿质子)</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.4,code by zhizi42(AI丿质子)</string>
     <string name="settings_title_join_qq">Join author\'s qq group</string>
     <string name="settings_title_debug">print log</string>
     <string name="settings_summary_debug">only use for debug</string>
@@ -32,10 +32,24 @@
     <string name="settings_title_donate">Buy coffee for developers</string>
     <string name="settings_title_no_money_plan">No Money Plan</string>
     <string name="donate_call_alipay_text">Open Alipay directly to donate</string>
-    <string name="dialog_text_no_money">This application has joined the no money plan and promises to be used for free without any additional features.</string>
-    <string name="dialog_button_text_no_money_link">Open the website for the No Money Plan</string>
+    <string name="settings_dialog_text_no_money">This application has joined the no money plan and promises to be used for free without any additional features.</string>
+    <string name="settings_dialog_button_text_no_money_link">Open the website for the No Money Plan</string>
     <string name="settings_open_qq_fail">Failed to open QQ, please check if the latest version of QQ is installed on your phone</string>
     <string name="input_image_tips_text">Click on the image to select, click the \"Add Image\" button below to add an image (requires root permission), long press the image to delete it, and click \"Clear Selected\" to restore the original image</string>
     <string name="input_image_dialog_confirm_root_title">Please grant root permission</string>
     <string name="input_image_dialog_confirm_root_msg">The application requires root permission to add images (copy images to the application\'s private directory), please grant root permission.</string>
+    <string name="save_filename_dialog_edittext_hint">save file name(excluding suffix names)</string>
+    <string name="save_filename_dialog_title">save file name</string>
+    <string name="save_toast_file_exists">The file name to be saved already exists, please change the name</string>
+    <string name="diy_card_toast_image_resolution_small">The image resolution is too low, and the final image effect may not be good</string>
+    <string name="select_image_button_start_diy">Crop to standard size and optionally add card logo</string>
+    <string name="select_image_button_save">confirm add</string>
+    <string name="select_image_save_copy_error_toast">Copy file failed, please confirm granting root permission and contact the developer</string>
+    <string name="select_image_tips">Clicking confirm to add will add the current preview image style to the application card package image library.\nAt present, the one click add card face logo function only supports the Beijing Tianjin Hebei Interconnection Card, Shanghai Public Transport Card Traffic Union Edition, Quancheng Pass, and Yinchuan Transportation One Card.\nDue to the author\'s limited skills and energy, they will not provide all transportation card faces and other card faces.\nIf you have the ability, you can take out the desired card logo image and hand it over to the author, who will add it to the application.</string>
+    <string name="select_image_button_tips">Instructions</string>
+    <string name="settings_clear_cache_dialog_title">Clear cache?</string>
+    <string name="settings_clear_cache_dialog_text">Are you sure you want to clear the image loading cache of yourself and your Xiaomi smart card and forcefully stop the Xiaomi smart card?\nClearing may correct image loading errors, but it will prolong loading time.\nAfter clearing, please restart this application for it to take effect.</string>
+    <string name="select_image_done_dialog_title">Add image completed</string>
+    <string name="select_image_done_dialog_text">Add image completed!\nIf the card surface of the card pack displays an error, it may be because you entered the same file name as before. You can update it by clearing the cache in the settings.</string>
+    <string name="select_image_done_dialog_clear_cache">Clear cache immediately</string>
 </resources>

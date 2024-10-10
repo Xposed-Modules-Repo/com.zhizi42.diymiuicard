@@ -3,8 +3,6 @@
 
     <PreferenceCategory app:title="@string/settings_title_settings">
         <SwitchPreference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:defaultValue="false"
             android:title="@string/settings_title_show_all_cards"
             app:key="show_all_cards"
@@ -17,20 +15,20 @@
             app:key="hide_icon"
             app:summary="@string/settings_summary_hide_icon" />
         <SwitchPreference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:defaultValue="false"
             android:title="@string/settings_title_debug"
             app:icon="@drawable/ic_bug"
             app:key="debug"
             app:summary="@string/settings_summary_debug" />
         <Preference
+            android:title="清除图片加载缓存"
+            app:icon="@drawable/ic_delete"
+            app:key="delete_image_cache" />
+        <Preference
             app:fragment="com.zhizi42.diymiuicard.SettingsActivity$CustomHookFragment"
             app:key="messages_header"
             app:title="@string/settings_title_custom_hook" />
         <Preference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:title="@string/how_to_use_title"
             app:icon="@drawable/ic_question"
             app:key="how_to_use" />
@@ -38,25 +36,17 @@
 
     <PreferenceCategory app:title="@string/settings_title_about">
         <Preference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:title="@string/settings_title_about"
             app:key="about"
             app:icon="@drawable/ic_info" />
         <Preference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:title="@string/settings_title_join_qq"
             app:key="join_qq" />
         <Preference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:title="@string/settings_title_donate"
             app:icon="@drawable/ic_coffee"
             app:key="donate" />
         <Preference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:title="@string/settings_title_no_money_plan"
             app:icon="@drawable/ic_money_off"
             app:key="no_money" />

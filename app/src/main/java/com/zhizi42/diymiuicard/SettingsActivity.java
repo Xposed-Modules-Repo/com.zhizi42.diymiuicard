@@ -156,13 +156,21 @@ public class SettingsActivity extends AppCompatActivity implements
                 noMoneyPlanPreference.setOnPreferenceClickListener(preference -> {
                     new AlertDialog.Builder(requireContext())
                             .setTitle(R.string.settings_title_no_money_plan)
-                            .setMessage(R.string.dialog_text_no_money)
-                            .setNegativeButton(R.string.dialog_button_text_no_money_link, (dialogInterface, i) -> {
+                            .setMessage(R.string.settings_dialog_text_no_money)
+                            .setNegativeButton(R.string.settings_dialog_button_text_no_money_link, (dialogInterface, i) -> {
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NoMoneyPlan"));
                                 startActivity(intent);
                             })
                             .setPositiveButton(R.string.confirm, null)
                             .show();
+                    return true;
+                });
+            }
+
+            Preference deleteImageCachePreference = findPreference("delete_image_cache");
+            if (deleteImageCachePreference != null) {
+                deleteImageCachePreference.setOnPreferenceClickListener(preference -> {
+                    Utils.clearCache(requireActivity());
                     return true;
                 });
             }

@@ -17,7 +17,7 @@
     <string name="settings_summary_show_all_cards_on">现在不过滤小卡片和logo</string>
     <string name="settings_summary_show_all_cards_off">现在会过滤小卡片和logo</string>
     <string name="settings_title_custom_hook">自定义hook点（仅供测试使用，不懂勿动）</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.3.1，code by AI丿质子</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.4，code by AI丿质子</string>
     <string name="settings_title_join_qq">加入作者的QQ群</string>
     <string name="settings_title_debug">输出log</string>
     <string name="settings_summary_debug">仅供debug使用</string>
@@ -31,10 +31,24 @@
     <string name="settings_title_donate">给开发者买咖啡</string>
     <string name="settings_title_no_money_plan">无钱计划</string>
     <string name="donate_call_alipay_text">直接打开支付宝去捐赠</string>
-    <string name="dialog_text_no_money">本应用已加入 无钱计划，承诺一直免费使用且无收费附加功能。</string>
-    <string name="dialog_button_text_no_money_link">打开无钱计划网址</string>
+    <string name="settings_dialog_text_no_money">本应用已加入 无钱计划，承诺一直免费使用且无收费附加功能。</string>
+    <string name="settings_dialog_button_text_no_money_link">打开无钱计划网址</string>
     <string name="settings_open_qq_fail">打开QQ失败，请检查手机是否有安装最新版QQ</string>
     <string name="input_image_tips_text">点击图片来选择，点击下面的添加图片按钮来添加图片（需要root权限），长按图片来删除图片，点击“清空已选”来还原原图</string>
     <string name="input_image_dialog_confirm_root_title">请授予root权限</string>
     <string name="input_image_dialog_confirm_root_msg">应用需要root权限才能添加图片（复制图片到应用私有目录），请授予root权限。</string>
+    <string name="save_filename_dialog_edittext_hint">保存文件名（不包括后缀名，不建议使用非英文字符）</string>
+    <string name="save_filename_dialog_title">保存文件名</string>
+    <string name="save_toast_file_exists">要保存的文件名已存在，请更换名字</string>
+    <string name="diy_card_toast_image_resolution_small">图片分辨率过小，最终图片效果可能不好</string>
+    <string name="select_image_button_start_diy">裁剪至标准大小并可选添加卡面标志</string>
+    <string name="select_image_button_save">确定添加</string>
+    <string name="select_image_save_copy_error_toast">复制文件失败，请确定授予root权限后联系开发者</string>
+    <string name="select_image_tips">点击确认添加会添加当前预览的图片样式到应用卡包图片库。\n目前一键添加卡面标志功能仅支持京津冀互联互通卡、上海公共交通卡 交通联合版、泉城通、银川交通一卡通。\n因作者技术和精力有限，不会提供所有交通卡卡面和其它卡卡面。\n如您有能力，可自行取出想要的卡面标志图片交给作者，作者会添加到应用。</string>
+    <string name="select_image_button_tips">相关说明</string>
+    <string name="settings_clear_cache_dialog_title">是否清除缓存？</string>
+    <string name="settings_clear_cache_dialog_text">是否确认清除自己和小米智能卡的图片加载缓存并强行停止小米智能卡？\n清除后可能会修正图片加载错误，但会延长加载时间。\n清除后请重启本应用以生效。</string>
+    <string name="select_image_done_dialog_title">添加图片完成</string>
+    <string name="select_image_done_dialog_text">添加图片完成！\n若卡包卡片卡面显示错误，可能是因为您输入了与之前相同的文件名，到设置清理缓存即可更新。</string>
+    <string name="select_image_done_dialog_clear_cache">马上清除缓存</string>
 </resources>

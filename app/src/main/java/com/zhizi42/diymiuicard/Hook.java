@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -24,6 +25,10 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import static android.content.Context.MODE_PRIVATE;
 
 import androidx.annotation.Keep;
+
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 @Keep
 public class Hook implements IXposedHookLoadPackage {
@@ -173,6 +178,26 @@ public class Hook implements IXposedHookLoadPackage {
                     param.setResult(imageUrl);
                 } else {
                     debugLog("zhizi42's diy miui card: load image's not have diy image");
+                }
+            }
+        });
+
+        XposedHelpers.findAndHookMethod("com.bumptech.glide.j", loadPackageParam.classLoader, "s", java.lang.Object.class, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+            }
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+                if (param.args[0] instanceof String) {
+                    String path = (String) param.args[0];
+                    if (path.startsWith("file://")) {
+                        RequestBuilder<Drawable> requestBuilder = (RequestBuilder<Drawable>) param.getResult();
+                        requestBuilder = requestBuilder.skipMemoryCache(true)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE);
+                        XposedBridge.log("succ skip cache");
+                    }
                 }
             }
         });

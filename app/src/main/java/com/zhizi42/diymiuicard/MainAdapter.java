@@ -16,12 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zhizi42.diymiuicard.databinding.ImageInputDialogBinding;
 import com.zhizi42.diymiuicard.databinding.ItemMainCardBinding;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -32,11 +35,13 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.context = context;
     }
 
-    public void setList(ArrayList<String> cardUrlList) {
+    public void refresh() {
         SharedPreferences sharedPreferences =
                 context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        Set<String> cardUrlSetNew = sharedPreferences.getStringSet("all_card_url_set", new HashSet<>());
+        this.cardUrlList = new ArrayList<>(cardUrlSetNew);
         cardUrlList.sort(new CustomComparator(sharedPreferences));
-        this.cardUrlList = cardUrlList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -70,6 +75,8 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @SuppressLint("SdCardPath") String path = "/data/data/com.zhizi42.diymiuicard/files/images/" + imageName;
                 Glide.with(context)
                         .load(new File(path))
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .placeholder(R.drawable.ic_image)
                         .error(R.drawable.ic_error)
                         .into(mainViewHolder.imageViewImage);
@@ -90,6 +97,14 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 })
                 .setPositiveButton(R.string.confirm, null)
                 .show());
+
+        mainViewHolder.imageViewCard.setOnLongClickListener(v -> {
+            Set<String> cardUrlSet = new HashSet<>(sharedPreferences.getStringSet("all_card_url_set", new HashSet<>()));
+            cardUrlSet.remove(cardUrlList.get(position));
+            sharedPreferences.edit().putStringSet("all_card_url_set", cardUrlSet).commit();
+            refresh();
+            return true;
+        });
 
         mainViewHolder.imageViewImage.setOnClickListener(v -> {
             ImageInputDialogBinding binding = ImageInputDialogBinding.inflate(LayoutInflater.from(context));
@@ -120,7 +135,7 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(linearLayoutManager);
-            MyImagesAdapter adapter = new MyImagesAdapter(context, cardUrl, name -> {
+            MyImagesAdapter adapter = new MyImagesAdapter(context, name -> {
                 sharedPreferences.edit().putString(cardUrl, name).apply();
                 alertDialog.dismiss();
                 notifyItemChanged(position);

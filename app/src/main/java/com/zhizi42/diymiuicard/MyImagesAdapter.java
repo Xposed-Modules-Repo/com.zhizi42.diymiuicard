@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zhizi42.diymiuicard.databinding.ItemMyImageBinding;
 
 import java.io.File;
@@ -20,16 +21,14 @@ public class MyImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     Context context;
     ArrayList<File> fileList;
-    String cardUrl;
     OnImageClick onImageClick;
 
     public interface OnImageClick {
         void onClick(String name);
     }
 
-    MyImagesAdapter(Context context, String cardUrl, OnImageClick onImageClick) {
+    MyImagesAdapter(Context context, OnImageClick onImageClick) {
         this.context = context;
-        this.cardUrl = cardUrl;
         this.onImageClick = onImageClick;
         this.fileList = new ArrayList<>();
         refreshFilelist();
@@ -58,6 +57,8 @@ public class MyImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         ImageView imageView = myImagesViewHolder.imageView;
         Glide.with(context)
                 .load(fileList.get(position))
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.ic_image)
                 .error(R.drawable.ic_error)
                 .into(imageView);
