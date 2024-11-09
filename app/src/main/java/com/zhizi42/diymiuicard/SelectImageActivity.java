@@ -23,11 +23,14 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -59,11 +62,30 @@ public class SelectImageActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivitySelectImageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
             return insets;
         });
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets statusBars = insets.getInsets(
+                        WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
+                int toolbarHeight = getResources().getDimensionPixelSize(R.dimen.toolbar_height);
+                binding.toolbar.setMinimumHeight(statusBars.top + toolbarHeight);
+                v.setPadding(v.getPaddingLeft(), statusBars.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            }
+        });
+
+        setSupportActionBar(binding.toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         //设置剪裁的参数，最大960px x 606px，长宽比与最大限制相同，格式png，质量100，颜色和主界面一样
         options = new UCrop.Options();

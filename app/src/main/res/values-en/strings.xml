@@ -18,7 +18,7 @@
     <string name="settings_summary_show_all_cards_on">Don\'t filter small cards and logos now</string>
     <string name="settings_summary_show_all_cards_off">Now will filter the small cards and logos</string>
     <string name="settings_title_custom_hook">Custom hook class and mathod</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.4,code by zhizi42(AI丿质子)</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.4.1,code by zhizi42(AI丿质子)</string>
     <string name="settings_title_join_qq">Join author\'s qq group</string>
     <string name="settings_title_debug">print log</string>
     <string name="settings_summary_debug">only use for debug</string>
@@ -52,4 +52,5 @@
     <string name="select_image_done_dialog_title">Add image completed</string>
     <string name="select_image_done_dialog_text">Add image completed!\nIf the card surface of the card pack displays an error, it may be because you entered the same file name as before. You can update it by clearing the cache in the settings.</string>
     <string name="select_image_done_dialog_clear_cache">Clear cache immediately</string>
+    <string name="activity_title_add_image">Add image</string>
 </resources>

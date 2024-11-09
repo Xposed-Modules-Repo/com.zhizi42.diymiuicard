@@ -1,22 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.DiyMiuiCard" parent="Theme.Material3.DayNight">
+    <style name="Base.Theme.DiyMiuiCard" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-
-        <item name="actionBarStyle">@style/CustomActionBar</item>
-        <item name="windowActionBar">true</item>
-        <item name="windowNoTitle">false</item>
-    </style>
-
-    <style name="CustomActionBar" parent="Widget.Material3.ActionBar.Solid">
-        <!-- 设置背景颜色 -->
-        <item name="background">@color/colorPrimary</item>
-        <!-- 设置文字颜色 -->
-        <item name="titleTextStyle">@style/CustomActionBarTitleText</item>
     </style>
 
     <style name="CustomActionBarTitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">

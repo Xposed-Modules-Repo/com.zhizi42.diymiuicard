@@ -5,18 +5,25 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.zhizi42.diymiuicard.databinding.SettingsActivityBinding;
 
 import java.util.Objects;
 
@@ -25,10 +32,14 @@ public class SettingsActivity extends AppCompatActivity implements
 
     private static final String TITLE_TAG = "settingsActivityTitle";
 
+    private SettingsActivityBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_activity);
+        binding = SettingsActivityBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -43,6 +54,20 @@ public class SettingsActivity extends AppCompatActivity implements
                         setTitle(R.string.title_activity_settings);
                     }
                 });
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets statusBars = insets.getInsets(
+                        WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
+                int toolbarHeight = getResources().getDimensionPixelSize(R.dimen.toolbar_height);
+                binding.toolbar.setMinimumHeight(statusBars.top + toolbarHeight);
+                v.setPadding(v.getPaddingLeft(), statusBars.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            }
+        });
+        setSupportActionBar(binding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);

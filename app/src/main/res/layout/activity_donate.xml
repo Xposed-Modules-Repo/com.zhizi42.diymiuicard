@@ -15,6 +15,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="?attr/actionBarTheme"
+                app:buttonGravity="center_vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:title="@string/settings_title_donate"
+                app:titleTextAppearance="@style/CustomActionBarTitleText" />
+
             <Button
                 android:id="@+id/buttonCallAlipay"
                 android:layout_width="wrap_content"
@@ -22,8 +36,9 @@
                 android:onClick="openAlipay"
                 android:text="@string/donate_call_alipay_text"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
             <ImageView
                 android:id="@+id/imageViewAlipay"

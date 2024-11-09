@@ -18,7 +18,7 @@
     <string name="settings_summary_show_all_cards_on">現在不過濾小卡片和logo</string>
     <string name="settings_summary_show_all_cards_off">現在會過濾小卡片和logo</string>
     <string name="settings_title_custom_hook">自定義hook點（僅供測試使用，不懂勿動）</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.4，code by AI丿質子</string>
+    <string name="settings_about_msg">DIY MIUI Card v1.4.1，code by AI丿質子</string>
     <string name="settings_title_join_qq">加入作者的QQ群</string>
     <string name="settings_title_debug">輸出log</string>
     <string name="settings_summary_debug">僅供debug使用</string>
@@ -52,4 +52,5 @@
     <string name="select_image_done_dialog_title">添加圖片完成</string>
     <string name="select_image_done_dialog_text">添加圖片完成！\n若卡包卡片卡面顯示錯誤，可能是因為您輸入了與之前相同的文件名，到設置清理緩存即可更新。</string>
     <string name="select_image_done_dialog_clear_cache">馬上清除緩存</string>
+    <string name="activity_title_add_image">添加圖片</string>
 </resources>
