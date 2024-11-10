@@ -70,12 +70,11 @@ public class MyImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             cmdStringList.add(
                     String.format("rm \"/data/data/com.miui.tsmclient/files/images/%s\"",
                             fileList.get(position).getName()));
-            if (Utils.executeShell(cmdStringList)) {
-                if (fileList.get(position).delete()) {
-                    fileList.remove(position);
-                    notifyDataSetChanged();
-                    return true;
-                }
+            Utils.executeShell(cmdStringList);
+            if (fileList.get(position).delete()) {
+                fileList.remove(position);
+                notifyDataSetChanged();
+                return true;
             }
             return false;
         });
