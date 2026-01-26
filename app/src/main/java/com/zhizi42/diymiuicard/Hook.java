@@ -66,6 +66,7 @@ public class Hook extends XposedModule {
     }
 
     public static class HookHyper implements Hooker {
+        @Keep
         public static void after(AfterHookCallback callback) {
             //获取替换后的图片路径，不为空就设置hook的函数返回值为路径
             String url = replaceUrl((String) callback.getArgs()[0], 0);
@@ -76,6 +77,7 @@ public class Hook extends XposedModule {
     }
 
     public static class HookColor implements Hooker {
+        @Keep
         public static void before(BeforeHookCallback callback) {
             //获取替换后的图片路径，不为空就设置hook的函数参数为路径
             String url = replaceUrl((String) callback.getArgs()[0], 1);
@@ -86,6 +88,7 @@ public class Hook extends XposedModule {
     }
 
     public static class HookContext implements Hooker {
+        @Keep
         public static void before(BeforeHookCallback callback) {
             //获取可写入的prefs
             try {
