@@ -9,14 +9,19 @@ android {
     }
 
     namespace 'com.zhizi42.diymiuicard'
-    compileSdk 35
+    compileSdkVersion 'android-36.1'
 
     defaultConfig {
         applicationId "com.zhizi42.diymiuicard"
         minSdk 24
-        targetSdk 35
-        versionCode 7
-        versionName "1.4.2"
+        targetSdk 36
+        versionCode 8
+        versionName "2.0"
+
+        ndk {
+            //noinspection ChromeOsAbiSupport
+            abiFilters "arm64-v8a"
+        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,26 +37,31 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
-    buildToolsVersion '35.0.0'
+    buildToolsVersion '36.1.0'
+    ndkVersion '29.0.14206865'
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.preference:preference:1.2.1'
-    implementation 'androidx.activity:activity:1.9.1'
+    implementation 'androidx.activity:activity:1.12.2'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
 
-    compileOnly files('libs/XposedBridgeApi-82.jar')
-    implementation 'com.github.bumptech.glide:glide:4.15.1'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-    implementation 'com.github.yalantis:ucrop:2.2.9'
+    compileOnly 'io.github.libxposed:api:100'
+    implementation 'io.github.libxposed:service:100-1.0.0'
+    implementation 'com.github.bumptech.glide:glide:5.0.5'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
+    implementation 'com.github.yalantis:ucrop:2.2.11'
+    implementation 'com.crossbowffs.remotepreferences:remotepreferences:0.8'
+    implementation 'org.luckypray:dexkit:2.0.7'
 }
 
 static def getTimeStamp() {

@@ -11,6 +11,11 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url "https://jitpack.io" }
+        mavenLocal {
+            content {
+                includeGroup("io.github.libxposed")
+            }
+        }
     }
 }
 

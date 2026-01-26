@@ -8,9 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,18 +16,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.zhizi42.diymiuicard.databinding.ActivityMainBinding;
 
 import java.io.File;
+
+import io.github.libxposed.service.XposedService;
+import io.github.libxposed.service.XposedServiceHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private File myImagesFolder;
     private MyImagesAdapter myImagesAdapter;
     private ActivityResultLauncher<Intent> startSelectImageActivity;
+    private Context context;
 
     @SuppressLint("SdCardPath")
     @Override
@@ -48,36 +49,23 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar, new OnApplyWindowInsetsListener() {
-            @NonNull
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                Insets statusBars = insets.getInsets(
-                        WindowInsetsCompat.Type.statusBars()
-                                | WindowInsetsCompat.Type.displayCutout());//获取状态栏和屏幕缺口的inset
-                int toolbarHeight = getResources().getDimensionPixelSize(R.dimen.toolbar_height);//获取默认toolbar高度
-                binding.toolbar.setMinimumHeight(statusBars.top + toolbarHeight);//设置toolbar高度为默认高度+状态栏/屏幕缺口高度
-                v.setPadding(v.getPaddingLeft(), statusBars.top, v.getPaddingRight(), v.getPaddingBottom());//设置顶部padding为状态栏/屏幕缺口高度
-                return insets;
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar, (v, insets) -> {
+            Insets statusBars = insets.getInsets(
+                    WindowInsetsCompat.Type.statusBars()
+                            | WindowInsetsCompat.Type.displayCutout());//获取状态栏和屏幕缺口的inset
+            int toolbarHeight = getResources().getDimensionPixelSize(R.dimen.toolbar_height);//获取默认toolbar高度
+            binding.toolbar.setMinimumHeight(statusBars.top + toolbarHeight);//设置toolbar高度为默认高度+状态栏/屏幕缺口高度
+            v.setPadding(v.getPaddingLeft(), statusBars.top, v.getPaddingRight(), v.getPaddingBottom());//设置顶部padding为状态栏/屏幕缺口高度
+            return insets;
         });
-        ViewCompat.setOnApplyWindowInsetsListener(binding.recyclerView, new OnApplyWindowInsetsListener() {
-            @NonNull
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                Insets navigationBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars());//获取导航栏inset
-                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), navigationBar.bottom);//设置底部padding为导航栏高度
-                return insets;
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.recyclerView, (v, insets) -> {
+            Insets navigationBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars());//获取导航栏inset
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), navigationBar.bottom);//设置底部padding为导航栏高度
+            return insets;
         });
-
-        //如果hook自己成功，就设置文字为已开启
-        if (isOn()) {
-            binding.textView.setText(R.string.text_enable);
-        }
 
         SharedPreferences preferencesPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Utils.initSetting(preferencesPreferences);
+        Utils.setDebug(preferencesPreferences.getBoolean("debug", false));
         sharedPreferences = getSharedPreferences("settings", MODE_PRIVATE);
         if (sharedPreferences.getBoolean("first_run", true)) {
             howToUse();
@@ -89,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);//设置列表为垂直方向
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new MainAdapter(this);
-        adapter.refresh();//刷新适配器的数据
         recyclerView.setAdapter(adapter);
 
         //设置主界面下拉刷新
@@ -129,10 +116,41 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        //debug调试用，提示初始化主界面完毕
-        if (Utils.sharedPreferences.getBoolean("debug", false)) {
-            Log.e("diy miui card of zhizi42", "init main activity");
-        }
+        context = this;
+        XposedServiceHelper.registerListener(new XposedServiceHelper.OnServiceListener() {
+            @Override
+            public void onServiceBind(@NonNull XposedService service) {
+                MyXposedService.setService(service);
+
+                binding.textView.setText(R.string.text_enable);
+
+                adapter.refresh();//刷新适配器的数据
+                int OSType = Utils.checkOSType(context);
+                String packageName;
+                if (OSType == 0) {
+                    packageName = "com.miui.tsmclient";
+                } else if (OSType == 1) {
+                    packageName = "com.finshell.wallet";
+                } else {
+                    packageName = "";
+                    Utils.showNoCardApp(context);
+                }
+                if (! MyXposedService.getService().getScope().contains(packageName)) {
+                    new AlertDialog.Builder(context)
+                            .setTitle("请添加卡包APP到作用域")
+                            .setMessage("模块作用域没有卡包APP，请点击确定后，同意添加卡包APP到本模块作用域。")
+                            .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                                MyXposedService.getService().requestScope(packageName, new XposedService.OnScopeEventListener() {});
+                            })
+                            .show();
+                }
+            }
+
+            @Override
+            public void onServiceDied(@NonNull XposedService service) {
+            }
+        });
+
     }
 
     //显示使用说明
@@ -192,12 +210,5 @@ public class MainActivity extends AppCompatActivity {
 
     public File getMyImagesFolder() {
         return myImagesFolder;
-    }
-
-
-    //保持不被优化掉，用于hook自己检测有没有开启模块
-    @Keep
-    boolean isOn() {
-        return false;
     }
 }

@@ -1,6 +1,7 @@
 package com.zhizi42.diymiuicard;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -56,6 +58,8 @@ public class SelectImageActivity extends AppCompatActivity {
     private Bitmap bitmapCrop;
     private Bitmap bitmapResult;
 
+    int OSType = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,7 +98,11 @@ public class SelectImageActivity extends AppCompatActivity {
         options.setCompressionFormat(Bitmap.CompressFormat.PNG);
         options.setCompressionQuality(100);
         options.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        options.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+
+        OSType = Utils.checkOSType(this);
+        if (OSType == -1) {
+            Utils.showNoCardApp(this);
+        }
 
         //系统图片选择启动器
         ActivityResultLauncher<String> selectImageActivityLauncher = registerForActivityResult(
@@ -179,14 +187,22 @@ public class SelectImageActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        String path;
+        if (OSType == 0) {
+            path = "/data/data/com.miui.tsmclient/files/images/";
+        } else if (OSType == 1) {
+            path = "/data/data/com.finshell.wallet/files/images/";
+        } else {
+            return;
+        }
         //root权限执行命令 复制图片文件到小米智能卡目录并权限改为所有人可读
         ArrayList<String> cmdStringList = new ArrayList<>();
         cmdStringList.add(String.format("chmod 666 \"%s\"", imageCopy.getAbsolutePath()));
         cmdStringList.add(String.format("cp \"%s\" \"%s\"",
                 imageCopy.getAbsolutePath(),
-                "/data/data/com.miui.tsmclient/files/images/"));
+                path));
         cmdStringList.add(String.format("chmod 666 \"%s\"",
-                "/data/data/com.miui.tsmclient/files/images/" + imageCopy.getName()));
+                path + imageCopy.getName()));
         boolean succ = Utils.executeShell(cmdStringList);
         if (!succ) {
             Toast.makeText(this, R.string.select_image_save_copy_error_toast, Toast.LENGTH_LONG).show();

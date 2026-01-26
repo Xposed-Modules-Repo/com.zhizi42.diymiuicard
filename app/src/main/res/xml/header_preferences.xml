@@ -4,43 +4,56 @@
     <PreferenceCategory app:title="@string/settings_title_settings">
         <SwitchPreference
             android:defaultValue="false"
-            android:title="@string/settings_title_show_all_cards"
-            app:key="show_all_cards"
-            app:summaryOff="@string/settings_summary_show_all_cards_off"
-            app:summaryOn="@string/settings_summary_show_all_cards_on" />
-        <SwitchPreference
-            android:defaultValue="false"
             android:title="@string/settings_title_hide_icon"
             app:icon="@drawable/ic_hide_image"
             app:key="hide_icon"
             app:summary="@string/settings_summary_hide_icon" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:title="@string/settings_title_debug"
-            app:icon="@drawable/ic_bug"
-            app:key="debug"
-            app:summary="@string/settings_summary_debug" />
         <Preference
-            android:title="清除图片加载缓存"
+            android:title="@string/settings_clear_card_cache"
             app:icon="@drawable/ic_delete"
             app:key="delete_image_cache" />
         <Preference
-            app:fragment="com.zhizi42.diymiuicard.SettingsActivity$CustomHookFragment"
-            app:key="messages_header"
-            app:title="@string/settings_title_custom_hook" />
+            android:title="@string/settings_title_blacklist"
+            app:icon="@drawable/ic_black_list"
+            app:key="black_list"
+            app:summary="@string/settings_summary_blacklist" />
         <Preference
             android:title="@string/how_to_use_title"
             app:icon="@drawable/ic_question"
             app:key="how_to_use" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/settings_title_about">
+    <PreferenceCategory app:title="developer option" app:key="dev_opt" app:isPreferenceVisible="false">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/settings_title_show_all_cards"
+            app:key="show_all_cards"
+            app:summaryOff="@string/settings_summary_show_all_cards_off"
+            app:summaryOn="@string/settings_summary_show_all_cards_on"
+            app:isPreferenceVisible="false"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/settings_title_debug"
+            app:icon="@drawable/ic_bug"
+            app:key="debug"
+            app:summary="@string/settings_summary_debug"
+            app:isPreferenceVisible="false"/>
         <Preference
+            app:fragment="com.zhizi42.diymiuicard.SettingsActivity$CustomHookFragment"
+            app:key="custom_hook"
+            app:title="@string/settings_title_custom_hook"
+            app:isPreferenceVisible="false"/>
+
+
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/settings_title_about">
+        <com.zhizi42.diymiuicard.LongClickPreference
             android:title="@string/settings_title_about"
             app:key="about"
             app:icon="@drawable/ic_info" />
         <Preference
             android:title="@string/settings_title_join_qq"
+            app:icon="@drawable/ic_qq"
             app:key="join_qq" />
         <Preference
             android:title="@string/settings_title_donate"

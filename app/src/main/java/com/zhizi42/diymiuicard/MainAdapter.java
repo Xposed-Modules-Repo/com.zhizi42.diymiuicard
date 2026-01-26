@@ -5,9 +5,13 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.ParcelFileDescriptor;
+import android.renderscript.ScriptGroup;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -20,26 +24,33 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zhizi42.diymiuicard.databinding.ImageInputDialogBinding;
 import com.zhizi42.diymiuicard.databinding.ItemMainCardBinding;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.github.libxposed.service.XposedService;
+
 public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    ArrayList<String> cardUrlList;
+    ArrayList<String> cardUrlList = new ArrayList<>();
     Context context;
 
     MainAdapter(Context context) {
         this.context = context;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void refresh() {
         SharedPreferences sharedPreferences =
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-        Set<String> cardUrlSetNew = sharedPreferences.getStringSet("all_card_url_set", new HashSet<>());
-        this.cardUrlList = new ArrayList<>(cardUrlSetNew);
+            context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        Set<String> cardUrlSet = sharedPreferences.getStringSet("all_card_url_set", new HashSet<>());
+        cardUrlList = new ArrayList<>(cardUrlSet);
         cardUrlList.sort(new CustomComparator(sharedPreferences));
         notifyDataSetChanged();
     }
@@ -98,10 +109,20 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 .setPositiveButton(R.string.confirm, null)
                 .show());
 
+        //长按删除并添加到黑名单
         mainViewHolder.imageViewCard.setOnLongClickListener(v -> {
             Set<String> cardUrlSet = new HashSet<>(sharedPreferences.getStringSet("all_card_url_set", new HashSet<>()));
-            cardUrlSet.remove(cardUrlList.get(position));
-            sharedPreferences.edit().putStringSet("all_card_url_set", cardUrlSet).commit();
+            cardUrlSet.remove(cardUrl);
+            Set<String> cardUrlBlackSet = new HashSet<>(sharedPreferences.getStringSet("black_card_url_set", new HashSet<>()));
+            cardUrlBlackSet.add(cardUrl);
+            sharedPreferences.edit().putStringSet("all_card_url_set", cardUrlSet).apply();
+            sharedPreferences.edit().putStringSet("black_card_url_set", cardUrlBlackSet).apply();
+            XposedService service = MyXposedService.getService();
+            if (service != null) {
+                service.getRemotePreferences("settings").edit().putStringSet("black_card_url_set", cardUrlBlackSet).apply();
+            } else {
+                Toast.makeText(context, "xposed service not exist", Toast.LENGTH_LONG).show();
+            }
             refresh();
             return true;
         });
@@ -114,6 +135,12 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .setNeutralButton(R.string.input_image_button_tips_title, null)
                     .setNegativeButton(R.string.input_image_button_clear, ((dialog, which) -> {
                         sharedPreferences.edit().remove(cardUrl).apply();
+                        XposedService service = MyXposedService.getService();
+                        if (service != null) {
+                            service.getRemotePreferences("settings").edit().remove(cardUrl).apply();
+                        } else {
+                            Toast.makeText(context, "xposed service not exist", Toast.LENGTH_LONG).show();
+                        }
                         notifyItemChanged(position);
                     }))
                     .setPositiveButton(R.string.confirm, (dialog, which) -> {
@@ -126,6 +153,12 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         }
 
                         sharedPreferences.edit().putString(cardUrl, imageName0).apply();
+                        XposedService service = MyXposedService.getService();
+                        if (service != null) {
+                            service.getRemotePreferences("settings").edit().putString(cardUrl, imageName0).apply();
+                        } else {
+                            Toast.makeText(context, "xposed service not exist", Toast.LENGTH_LONG).show();
+                        }
                         notifyItemChanged(position);
                     })
                     .create();
@@ -137,6 +170,12 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             recyclerView.setLayoutManager(linearLayoutManager);
             MyImagesAdapter adapter = new MyImagesAdapter(context, name -> {
                 sharedPreferences.edit().putString(cardUrl, name).apply();
+                XposedService service = MyXposedService.getService();
+                if (service != null) {
+                    service.getRemotePreferences("settings").edit().putString(cardUrl, name).apply();
+                } else {
+                    Toast.makeText(context, "xposed service not exist", Toast.LENGTH_LONG).show();
+                }
                 alertDialog.dismiss();
                 notifyItemChanged(position);
             });

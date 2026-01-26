@@ -6,223 +6,307 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
+import android.os.ParcelFileDescriptor;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
 import dalvik.system.DexClassLoader;
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import io.github.libxposed.api.XposedInterface;
+import io.github.libxposed.api.XposedModule;
+import io.github.libxposed.api.utils.DexParser;
 
 import static android.content.Context.MODE_PRIVATE;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.crossbowffs.remotepreferences.RemotePreferences;
+
+import org.luckypray.dexkit.DexKitBridge;
+import org.luckypray.dexkit.exceptions.NoResultException;
+import org.luckypray.dexkit.query.FindClass;
+import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
+import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.query.matchers.base.StringMatcher;
+import org.luckypray.dexkit.result.MethodData;
+import org.luckypray.dexkit.result.MethodDataList;
+import org.luckypray.dexkit.wrap.DexMethod;
 
 @Keep
-public class Hook implements IXposedHookLoadPackage {
+public class Hook extends XposedModule {
 
-    public static ArrayList<String> cardUrlList = new ArrayList<>();
-    private Context context;
-    private boolean isDebug = true;
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences writeSharedPreference;
+    private static Hook self;
+
+    static {
+        System.loadLibrary("dexkit");
+    }
+
+    public Hook(@NonNull XposedInterface base, @NonNull ModuleLoadedParam param) {
+        super(base, param);
+        self = this;
+    }
+
+    public static class HookHyper implements Hooker {
+        public static void after(AfterHookCallback callback) {
+            //获取替换后的图片路径，不为空就设置hook的函数返回值为路径
+            String url = replaceUrl((String) callback.getArgs()[0], 0);
+            if (! url.isEmpty()) {
+                callback.setResult(url);
+            }
+        }
+    }
+
+    public static class HookColor implements Hooker {
+        public static void before(BeforeHookCallback callback) {
+            //获取替换后的图片路径，不为空就设置hook的函数参数为路径
+            String url = replaceUrl((String) callback.getArgs()[0], 1);
+            if (! url.isEmpty()) {
+                callback.getArgs()[0] = url;
+            }
+        }
+    }
+
+    public static class HookContext implements Hooker {
+        public static void before(BeforeHookCallback callback) {
+            //获取可写入的prefs
+            try {
+                Context context = (Context) callback.getArgs()[0];
+                writeSharedPreference = new RemotePreferences(
+                        context, "com.zhizi42.diymiuicard.preference", "settings");
+            } catch (Exception e) {
+                self.log("hook context error:");
+                self.log(e.toString());
+            }
+        }
+    }
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        if (loadPackageParam.packageName.equals("com.zhizi42.diymiuicard")) {
-            XposedHelpers.findAndHookMethod("com.zhizi42.diymiuicard.MainActivity", loadPackageParam.classLoader, "isOn", new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    super.afterHookedMethod(param);
-                    param.setResult(true);
-                }
-            });
-        } else if (loadPackageParam.packageName.equals("com.miui.tsmclient")) {
-            hook(loadPackageParam);
+    public void onPackageLoaded(@NonNull PackageLoadedParam param) {
+        super.onPackageLoaded(param);
+        switch (param.getPackageName()) {
+            case "com.miui.tsmclient":
+                hookStart(param, 0);
+                break;
+            case "com.finshell.wallet":
+                hookStart(param, 1);
+                break;
         }
     }
 
-    public void hook(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-                context = (Context) param.args[0];
-                if (context == null) {
-                    XposedBridge.log("zhizi42's diy miui card: attach context is null");
+    public void hookStart(PackageLoadedParam param, int OSType) {
+        sharedPreferences = getRemotePreferences("settings");
+
+        String targetClassName;
+        String targetMethodName;
+        try {
+            String methodFilePath;
+            if (OSType == 0) {
+                methodFilePath = "/data/data/com.miui.tsmclient/files/";
+            } else if (OSType == 1) {
+                methodFilePath = "/data/data/com.finshell.wallet/files/";
+            } else {
+                return;
+            }
+            File methodFile = new File(methodFilePath, "zhizi42.diycard.method.txt");
+            FileInputStream inputStream = new FileInputStream(methodFile);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            targetClassName = reader.readLine();
+            targetMethodName = reader.readLine();
+            if (targetClassName == null || targetMethodName == null) {
+                positionMethod(param, OSType);
+                return;
+            }
+            inputStream.close();
+            inputStreamReader.close();
+            reader.close();
+        } catch (Exception e) {
+            positionMethod(param, OSType);
+            return;
+        }
+
+        String imagesDirPath;
+        if (OSType == 0) {
+            imagesDirPath = "/data/data/com.miui.tsmclient/files/images";
+        } else if (OSType == 1) {
+            imagesDirPath = "/data/data/com.finshell.wallet/files/images";
+        } else {
+            return;
+        }
+        @SuppressLint("SdCardPath") File file = new File(imagesDirPath);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+
+
+        try {
+            Method attachMethod = Application.class.getDeclaredMethod("attach", Context.class);
+            hook(attachMethod, HookContext.class);
+
+            Class<?> targetClass = param.getClassLoader().loadClass(targetClassName);
+            Method targetMethod = targetClass.getDeclaredMethod(targetMethodName, String.class);
+
+            if (OSType == 0) {
+                hook(targetMethod, HookHyper.class);
+            } else if (OSType == 1) {
+                hook(targetMethod, HookColor.class);
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            positionMethod(param, OSType);
+        }
+    }
+
+    public void positionMethod(PackageLoadedParam param, int OSType) {
+            Utils.debugLog(this, "first hook error no such method, try positioning method.");
+
+            ApplicationInfo appInfo = param.getApplicationInfo();
+            String apkPath = appInfo.sourceDir;
+            try (DexKitBridge dexKitBridge = DexKitBridge.create(apkPath)) {
+                MethodData methodData;
+                if (OSType == 0) {
+                    methodData = dexKitBridge.findClass(FindClass.create()
+                            .searchPackages("com.miui.tsmclient.util")
+                    ).findMethod(FindMethod.create()
+                            .matcher(MethodMatcher.create()
+                                    .paramCount(1)
+                                    .paramTypes(String.class)
+                                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                                    .returnType(Object.class)
+                            )
+                    ).single();
+                } else if (OSType == 1) {
+                    methodData = dexKitBridge.findClass(FindClass.create().matcher(ClassMatcher.create()
+                                    .className("com.finshell.finui.widget.imageview.CircleNetworkImageView")))
+                            .findMethod(FindMethod.create().matcher(MethodMatcher.create()
+                                            .paramCount(1)
+                                            .paramTypes(String.class)
+                                            .modifiers(Modifier.PRIVATE)
+                                            .returnType(ClassMatcher.create().className(
+                                                    StringMatcher.create(
+                                                            "com.bumptech.glide.integration.okhttp3",
+                                                            StringMatchType.StartsWith)
+                                            ))
+                                    )
+                            ).single();
+                } else {
                     return;
                 }
-                MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
-                SharedPreferences sharedPreferencesSettings = MultiprocessSharedPreferences
-                        .getSharedPreferences(context, "com.zhizi42.diymiuicard_preferences", MODE_PRIVATE);
-                isDebug = sharedPreferencesSettings.getBoolean("debug", false);
-                SharedPreferences sharedPreferences = MultiprocessSharedPreferences
-                        .getSharedPreferences(context, "settings", MODE_PRIVATE);
-                @SuppressLint("SdCardPath") File file = new File("/data/data/com.miui.tsmclient/files/images");
-                if (! file.exists()) {
-                    file.mkdir();
+                Method method = methodData.getMethodInstance(param.getClassLoader());
+                DexMethod dexMethod = methodData.toDexMethod();
+                updateTargetHookName(dexMethod.getClassName(), dexMethod.getName(), OSType);
+                if (OSType == 0) {
+                    hook(method, HookHyper.class);
+                } else if (OSType == 1) {
+                    hook(method, HookColor.class);
                 }
-                String targetClassName = sharedPreferences.getString("target_class_name", "com.miui.tsmclient.util.z");
-                String targetMethodName = sharedPreferences.getString("target_method_name", "i");
-                try {
-                    hookTarget(targetClassName, targetMethodName, loadPackageParam);
-                } catch (NoSuchMethodError e) {
-                    PackageManager packageManager = context.getPackageManager();
-                    try {
-                        ApplicationInfo appInfo = packageManager.getApplicationInfo("com.miui.tsmclient", 0);
-                        String apkPath = appInfo.sourceDir;
-                        ClassLoader classLoader = new DexClassLoader(apkPath, null, null, null);
-                        Object dexPathList = XposedHelpers.getObjectField(classLoader, "pathList");
-                        Object[] dexElements = (Object[]) XposedHelpers.getObjectField(dexPathList, "dexElements");
-                        ArrayList<String> utilClassList = new ArrayList<>();
-                        for (Object dexElement : dexElements) {
-                            Object dexFile = XposedHelpers.getObjectField(dexElement, "dexFile");
-                            Enumeration<String> classNames = (Enumeration<String>) XposedHelpers.callMethod(dexFile, "entries");
-                            while (classNames.hasMoreElements()) {
-                                String className = classNames.nextElement();
-                                if (className.startsWith("com.miui.tsmclient.util")) {
-                                    utilClassList.add(className);
-                                }
-                            }
-                        }
-                        for (String className : utilClassList) {
-                            Class<?> clazz = XposedHelpers.findClass(className, loadPackageParam.classLoader);
-                            Method[] methods = clazz.getMethods();
-
-                            for (Method method : methods) {
-                                if (method.getParameterCount() == 1) {
-                                    if (method.getParameterTypes()[0] == String.class) {
-                                        if (method.getReturnType() == Object.class) {
-                                            targetClassName = className;
-                                            targetMethodName = method.getName();
-                                            updateTargetHookName(sharedPreferences, targetClassName, targetMethodName);
-                                            try {
-                                                hookTarget(targetClassName, targetMethodName, loadPackageParam);
-                                            } catch (NoSuchMethodError error)  {
-                                                XposedBridge.log(
-                                                        "zhizi42's diy miui card: hook load image method error: no such method, after positioning target method. message:" + error.toString());
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception e0) {
-                        XposedBridge.log("hook error:" + e0);
-                    }
-                }
+            } catch (NoSuchMethodException | NoResultException ex) {
+                log("hook load image method error: no such method, after positioning target method. message:" + ex);
             }
-        });
+
     }
 
-    public void hookTarget(String targetClassName, String targetMethodName,
-                           XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        MultiprocessSharedPreferences.setAuthority("com.zhizi42.diymiuicard.provider");
-        SharedPreferences sharedPreferences = MultiprocessSharedPreferences
-                .getSharedPreferences(context, "settings", MODE_PRIVATE);
-        SharedPreferences sharedPreferencesSettings = MultiprocessSharedPreferences
-                .getSharedPreferences(context, "com.zhizi42.diymiuicard_preferences", MODE_PRIVATE);
-        String className = sharedPreferencesSettings.getString("class", "");
-        String methodName = sharedPreferencesSettings.getString("method", "");
-        if (!className.isEmpty()) {
-            targetClassName = className;
-        }
-        if (!methodName.isEmpty()) {
-            targetMethodName = methodName;
-        }
+    public static String replaceUrl(String url, int OSType) {
+        Utils.debugLog(self, "load image's url:" + url);//记录加载的图片链接到log
 
-
-        XposedHelpers.findAndHookMethod(targetClassName, loadPackageParam.classLoader, targetMethodName, String.class, new XC_MethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-                String url = (String) param.args[0];
-                debugLog("zhizi42's diy miui card: load image's url:" + url);
-                boolean showAllCard = sharedPreferencesSettings.getBoolean("show_all_cards", false);
-                if (showAllCard) {
-                    cardUrlList.add(url);
-                } else {
-                    if (! (url.contains("w270h480") || url.contains("/door-card-img/logo/"))) {
-                        cardUrlList.add(url);
-                    }
+        boolean showAllCard = sharedPreferences.getBoolean("show_all_cards", false);
+        if (showAllCard) {
+            updateCardUrlList(url);//如果是显示所有卡片就直接添加到应用数据
+        } else {
+            if (OSType == 0) {
+                if (!(url.contains("w270h480") || url.contains("/door-card-img/logo/"))) {
+                    updateCardUrlList(url);//如果不是显示所有卡片，不是小图标才添加到数据
                 }
-                updateCardUrlList(sharedPreferences);
-                String imageName = sharedPreferences.getString(url, "");
-                debugLog("zhizi42's diy miui card: load image's diy image name:" + imageName);
-                if (!imageName.isEmpty()) {
-                    String imageUrl;
-                    if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
-                        imageUrl = imageName;
+            } else if (OSType == 1) {
+                updateCardUrlList(url);
+            } else {
+                return "";
+            }
+        }
+
+        String imageName = sharedPreferences.getString(url, "");//获取原卡面图片对应的diy卡面
+        if (!imageName.isEmpty()) {//如果diy卡面不为空
+            Utils.debugLog(self, "load image's diy image name:" + imageName);
+            String imageUrl;
+            if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
+                imageUrl = imageName;//如果是链接就直接设置为结果
+            } else {
+                String imagePath;
+                if (OSType == 0) {
+                    imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
+                } else if (OSType == 1) {
+                    imagePath = "/data/data/com.finshell.wallet/files/images/" + imageName;
+                } else {
+                    return "";
+                }
+                imageUrl = "file://" + imagePath;//如果是文件名字就加上file协议头和图片文件夹路径再设置为结果
+                //如果开启debug，判断本地diy图片文件是否存在
+                if (sharedPreferences.getBoolean("debug", false)) {
+                    File file = new File(imagePath);
+                    if (file.exists()) {
+                        Utils.debugLog(self, "diy image file exist");
                     } else {
-                        @SuppressLint("SdCardPath") String imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
-                        imageUrl = "file://" + imagePath;
-                        if (isDebug) {
-                            File file = new File(imagePath);
-                            if (file.exists()) {
-                                debugLog("zhizi42's diy miui card: diy image file exist");
-                            } else {
-                                debugLog("zhizi42's diy miui card: diy image file not exist");
-                            }
-                        }
-                    }
-                    param.setResult(imageUrl);
-                } else {
-                    debugLog("zhizi42's diy miui card: load image's not have diy image");
-                }
-            }
-        });
-
-        XposedHelpers.findAndHookMethod("com.bumptech.glide.j", loadPackageParam.classLoader, "s", java.lang.Object.class, new XC_MethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                super.beforeHookedMethod(param);
-            }
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-                if (param.args[0] instanceof String) {
-                    String path = (String) param.args[0];
-                    if (path.startsWith("file://")) {
-                        RequestBuilder<Drawable> requestBuilder = (RequestBuilder<Drawable>) param.getResult();
-                        requestBuilder = requestBuilder.skipMemoryCache(true)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE);
-                        XposedBridge.log("succ skip cache");
+                        Utils.debugLog(self, "diy image file not exist");
                     }
                 }
             }
-        });
+            return imageUrl;
+        } else {
+            Utils.debugLog(self, "load image's not have diy image");
+            return "";
+        }
     }
 
-    public void updateTargetHookName(SharedPreferences sharedPreferences, String targetClassName, String targetMethodName) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("target_class_name", targetClassName);
-        editor.putString("target_method_name", targetMethodName);
+    public void updateTargetHookName(String targetClassName, String targetMethodName, int OSType) {
+        //获取文件，写入类名-换行-写入方法名
+        String methodFilePath;
+        if (OSType == 0) {
+            methodFilePath = "/data/data/com.miui.tsmclient/files/";
+        } else if (OSType == 1) {
+            methodFilePath = "/data/data/com.finshell.wallet/files/";
+        } else {
+            return;
+        }
+        File methodFile = new File(methodFilePath, "zhizi42.diycard.method.txt");
+        try {
+            FileOutputStream outputStream = new FileOutputStream(methodFile);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+            bufferedWriter.write(targetClassName);
+            bufferedWriter.newLine();
+            bufferedWriter.write(targetMethodName);
+            bufferedWriter.flush();
+            outputStream.close();
+            outputStreamWriter.close();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            log(e.toString());
+        }
+    }
+
+    public static void updateCardUrlList(String newCardUrl) {
+        SharedPreferences.Editor editor = writeSharedPreference.edit();
+        Set<String> cardUrlSet = new HashSet<>(writeSharedPreference.getStringSet("all_card_url_set", new HashSet<>()));
+        cardUrlSet.add(newCardUrl);
+        editor.putStringSet("all_card_url_set", cardUrlSet);
         editor.apply();
-    }
-
-    public void updateCardUrlList(SharedPreferences sharedPreferences) {
-        if (cardUrlList != null) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Set<String> cardUrlSet = new HashSet<>(cardUrlList);
-            cardUrlSet.addAll(sharedPreferences.getStringSet("all_card_url_set", new HashSet<>()));
-            editor.putStringSet("all_card_url_set", cardUrlSet);
-            editor.apply();
-        }
-    }
-
-    public void debugLog(String s) {
-        if (isDebug) {
-            XposedBridge.log(s);
-        }
     }
 }

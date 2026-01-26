@@ -2,5 +2,6 @@
 <resources>
     <string-array name="xposedscope">
         <item>com.miui.tsmclient</item>
+        <item>com.finshell.wallet</item>
     </string-array>
 </resources>

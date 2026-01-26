@@ -2,10 +2,12 @@ package com.zhizi42.diymiuicard;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Keep;
@@ -20,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -55,17 +58,13 @@ public class SettingsActivity extends AppCompatActivity implements
                     }
                 });
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar, new OnApplyWindowInsetsListener() {
-            @NonNull
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                Insets statusBars = insets.getInsets(
-                        WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
-                int toolbarHeight = getResources().getDimensionPixelSize(R.dimen.toolbar_height);
-                binding.toolbar.setMinimumHeight(statusBars.top + toolbarHeight);
-                v.setPadding(v.getPaddingLeft(), statusBars.top, v.getPaddingRight(), v.getPaddingBottom());
-                return insets;
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar, (v, insets) -> {
+            Insets statusBars = insets.getInsets(
+                    WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
+            int toolbarHeight = getResources().getDimensionPixelSize(R.dimen.toolbar_height);
+            binding.toolbar.setMinimumHeight(statusBars.top + toolbarHeight);
+            v.setPadding(v.getPaddingLeft(), statusBars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
         });
         setSupportActionBar(binding.toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -107,6 +106,9 @@ public class SettingsActivity extends AppCompatActivity implements
         return true;
     }
 
+    private static long lastClickTime = 0;
+    private static int clickCount = 0;
+
     public static class HeaderFragment extends PreferenceFragmentCompat {
 
         @Override
@@ -131,7 +133,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 });
             }
 
-            Preference aboutPreference = findPreference("about");
+            LongClickPreference aboutPreference = findPreference("about");
             if (aboutPreference != null) {
                 aboutPreference.setOnPreferenceClickListener(preference -> {
                     new AlertDialog.Builder(requireContext())
@@ -199,6 +201,75 @@ public class SettingsActivity extends AppCompatActivity implements
                     return true;
                 });
             }
+
+            Preference blackListPreference = findPreference("black_list");
+            if (blackListPreference != null) {
+                blackListPreference.setOnPreferenceClickListener(preference -> {
+                    startActivity(new Intent(requireContext(), BlackListActivity.class));
+                    return true;
+                });
+            }
+
+            //如果开启了开发者选项就显示所有被隐藏项，反之亦然
+            SharedPreferences preferencesPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            Preference showAllCardsPreference = findPreference("show_all_cards");
+            Preference debugPreference = findPreference("debug");
+            Preference customHookPreference = findPreference("custom_hook");
+            Preference devOptGroupPreference = findPreference("dev_opt");
+            if (aboutPreference != null &&
+                    showAllCardsPreference != null &&
+                    debugPreference != null &&
+                    customHookPreference != null &&
+                    devOptGroupPreference != null) {
+                boolean isOpen = preferencesPreferences
+                        .getBoolean("dev_mode_open", false);
+                devOptGroupPreference.setVisible(isOpen);
+                showAllCardsPreference.setVisible(isOpen);
+                debugPreference.setVisible(isOpen);
+                customHookPreference.setVisible(isOpen);
+
+                aboutPreference.setLongClickListener(preference -> {
+                    //连续长按4次就开启开发者选项，显示所有被隐藏项
+                    long nowClickTime = System.currentTimeMillis();
+                    //如果两次点击时间间隔大于3000ms就重置计数器
+                    if (nowClickTime - lastClickTime > 3000) {
+                        clickCount = 0;
+                    }
+                    lastClickTime = nowClickTime;
+                    clickCount++;
+                    if (clickCount == 3) {
+                        Toast.makeText(requireContext(),
+                                "long click one times again to open/close dev mode",
+                                Toast.LENGTH_LONG).show();
+                    } else if (clickCount >= 4) {
+                        clickCount = 0;
+                        boolean isOpenNow = ! preferencesPreferences
+                                .getBoolean("dev_mode_open", false);;
+                        preferencesPreferences.edit()
+                                .putBoolean("dev_mode_open", isOpenNow).apply();
+                        devOptGroupPreference.setVisible(isOpenNow);
+                        showAllCardsPreference.setVisible(isOpenNow);
+                        debugPreference.setVisible(isOpenNow);
+                        customHookPreference.setVisible(isOpenNow);
+                    }
+                    return true;
+                });
+            }
+
+            //监听设置项的变化同步到remoteprefs
+            SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
+            if (showAllCardsPreference != null) {
+                showAllCardsPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    remotePrefs.edit().putBoolean("show_all_cards", (Boolean) newValue).apply();
+                    return true;
+                });
+            }
+            if (debugPreference != null) {
+                debugPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    remotePrefs.edit().putBoolean("debug", (Boolean) newValue).apply();
+                    return true;
+                });
+            }
         }
 
         public boolean joinQQGroup(String key) {
@@ -235,6 +306,23 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.custom_hook_preferences, rootKey);
+
+            //监听设置项的变化同步到remoteprefs
+            SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
+            Preference classPreference = findPreference("class");
+            if (classPreference != null) {
+                classPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    remotePrefs.edit().putString("class", (String) newValue).apply();
+                    return true;
+                });
+            }
+            Preference methodPreference = findPreference("method");
+            if (methodPreference != null) {
+                methodPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    remotePrefs.edit().putString("method", (String) newValue).apply();
+                    return true;
+                });
+            }
         }
     }
 }

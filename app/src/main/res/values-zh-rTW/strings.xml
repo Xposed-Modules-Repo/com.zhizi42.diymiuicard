@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">DIY MIUI NFC卡面</string>
     <string name="text_disable">已禁用</string>
-    <string name="text_enable">你好，XPosed</string>
+    <string name="text_enable">你好，LSPosed</string>
     <string name="confirm">確認</string>
     <string name="confirm_delete_msg">確認刪除所有卡片和圖片信息嗎？</string>
     <string name="cancel">取消</string>
-    <string name="how_to_use_msg">使用方法：\n1.啟用模塊\n2.打開設置裡的卡包找到要更換的卡，保證看到需要更換的圖像\n3.回到應用下拉刷新\n4.出現目標圖像後點擊箭頭右邊的圖像，點擊中間的添加圖 片按鈕以添加圖片，或者選擇已有的圖片\n5.重新打開卡包，此時圖像應已經變化。\n手動方法：打開文件管理器（如mt文件管理器）授予root權限，把要更換的圖像複製到\n/data/data/com.zhizi42.diymiuicard/files/images/\n和\n/data/data/com.miui.tsmclient/files/images/\n下，並修改權限為任何人可讀取，回到應用選擇圖片或者輸入完整文 件名（包括後綴名）</string>
+    <string name="how_to_use_msg">使用方法：\n1.啟用模塊\n2.打開設置裡的卡包找到要更換的卡，保證看到需要更換的圖像\n（ColorOS在看到圖片時請確認模塊在後臺，否則可能添加失敗）\n3.回到應用下拉刷新\n4.出現目標圖像後點擊箭頭右邊的圖像，點擊中間的添加圖片按鈕以添加圖片，或者選擇已有的圖片\n5.重新打開卡包，此時圖像應已經變化</string>
     <string name="how_to_use_title">使用說明</string>
     <string name="card_url_title">卡片網址</string>
     <string name="input_image_name_title">選擇圖片或輸入url</string>
@@ -18,7 +18,7 @@
     <string name="settings_summary_show_all_cards_on">現在不過濾小卡片和logo</string>
     <string name="settings_summary_show_all_cards_off">現在會過濾小卡片和logo</string>
     <string name="settings_title_custom_hook">自定義hook點（僅供測試使用，不懂勿動）</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.4.2，code by AI丿質子</string>
+    <string name="settings_about_msg">DIY NFC Card v2.0，code by AI丿質子\n感謝2255提供ColorOS測試機</string>
     <string name="settings_title_join_qq">加入作者的QQ群</string>
     <string name="settings_title_debug">輸出log</string>
     <string name="settings_summary_debug">僅供debug使用</string>
@@ -53,4 +53,13 @@
     <string name="select_image_done_dialog_text">添加圖片完成！\n若卡包卡片卡面顯示錯誤，可能是因為您輸入了與之前相同的文件名，到設置清理緩存即可更新。</string>
     <string name="select_image_done_dialog_clear_cache">馬上清除緩存</string>
     <string name="activity_title_add_image">添加圖片</string>
+    <string name="no_card_app_installed_content">未檢測到您的系統安裝了小米智能卡或ColorOS卡包，請檢查是否存在目標應用或已給予權限</string>
+    <string name="no_card_app_installed_title">未找到適配的卡包APP</string>
+    <string name="clear_card_cache_succ">清除緩存成功</string>
+    <string name="clear_card_cache_fail">清除緩存失敗</string>
+    <string name="settings_clear_card_cache">清除卡面圖片緩存</string>
+    <string name="settings_title_blacklist">主界面卡面黑名單</string>
+    <string name="settings_summary_blacklist">編輯不顯示在主界面的卡面名單</string>
+    <string name="activity_title_black_list">主界面卡面黑名單</string>
+    <string name="description">修改HyperOS和ColorOS卡包卡面圖片</string>
 </resources>

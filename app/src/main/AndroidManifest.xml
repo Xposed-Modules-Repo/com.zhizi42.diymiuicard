@@ -4,6 +4,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries>
+        <package android:name="com.miui.tsmclient" />
+        <package android:name="com.finshell.wallet" />
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,11 +19,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DiyMiuiCard"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31">
+        android:description="@string/description">
+        <activity
+            android:name=".BlackListActivity"
+            android:exported="false"
+            android:parentActivityName=".SettingsActivity" />
         <activity
             android:name=".SelectImageActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".DonateActivity"
             android:exported="false"
@@ -28,11 +37,6 @@
             android:exported="false"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity" />
-
-        <provider
-            android:name=".MultiprocessSharedPreferences"
-            android:authorities="com.zhizi42.diymiuicard.provider"
-            android:exported="true" />
 
         <activity
             android:name=".MainActivity"
@@ -45,10 +49,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-
         <activity-alias
             android:name=".StartMainActivity"
             android:exported="true"
@@ -60,18 +60,16 @@
             </intent-filter>
         </activity-alias>
 
-        <meta-data
-            android:name="xposedmodule"
-            android:value="true" />
-        <meta-data
-            android:name="xposeddescription"
-            android:value="修改MIUI NFC卡片卡面" />
-        <meta-data
-            android:name="xposedminversion"
-            android:value="53" />
-        <meta-data
-            android:name="xposedscope"
-            android:resource="@array/xposedscope" />
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        
+        <provider
+            android:authorities="com.zhizi42.diymiuicard.preference"
+            android:name="com.zhizi42.diymiuicard.MyPreferenceProvider"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
+
     </application>
 
 </manifest>

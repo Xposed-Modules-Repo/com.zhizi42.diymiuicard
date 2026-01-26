@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">DIY MIUI Card</string>
     <string name="text_disable">Disabled</string>
-    <string name="text_enable">Hello,XPosed</string>
+    <string name="text_enable">Hello,LSPosed</string>
     <string name="confirm">confirm</string>
     <string name="confirm_delete_msg">confirm delete all card and image information?</string>
     <string name="cancel">cancel</string>
-    <string name="how_to_use_msg">Usage:\n1. Enable module\n2. Open the card package in the settings and find the card to be replaced, making sure to see the image that needs to be replaced\n3. Go back to the application and refresh by pulling down\n4. Click on the image to the right of the arrow when the target image appears, click the add image button in the middle to add the image, or select an existing image\n5. Reopen the card package, and the image should have changed by now. \nManual method: Open a file manager (such as MT file manager) and grant root permission. Copy the image to be replaced to\n/data/data/com.zhizi42.diymiucard/files/images/\nand\n/data/data/com.miui.tsmclient/files/images/\n, and modify the permission to be readable by anyone. Go back to the application and select the image or enter the full file name (including the suffix)</string>
+    <string name="how_to_use_msg">Usage: 1. Enable module\n2. Open the card package in the settings and find the card to be replaced, making sure to see the image that needs to be replaced\n(ColorOS please confirm that the module is in the background when seeing the image, otherwise it may fail to add)\n3. Go back to the app and scroll down to refresh\n4. After the target image appears, click on the image to the right of the arrow, click the add image button in the middle to add the image, or select an existing image\n5. Reopen the card package, the image should have changed by now</string>
     <string name="how_to_use_title">How to use</string>
     <string name="card_url_title">Card URL</string>
     <string name="input_image_name_title">Select image or input URL</string>
@@ -18,7 +18,7 @@
     <string name="settings_summary_show_all_cards_on">Don\'t filter small cards and logos now</string>
     <string name="settings_summary_show_all_cards_off">Now will filter the small cards and logos</string>
     <string name="settings_title_custom_hook">Custom hook class and mathod</string>
-    <string name="settings_about_msg">DIY MIUI Card v1.4.2,code by zhizi42(AI丿质子)</string>
+    <string name="settings_about_msg">DIY NFC Card v2.0,code by zhizi42(AI丿质子)\nthanks 2255 provide ColorOS test phone</string>
     <string name="settings_title_join_qq">Join author\'s qq group</string>
     <string name="settings_title_debug">print log</string>
     <string name="settings_summary_debug">only use for debug</string>
@@ -53,4 +53,13 @@
     <string name="select_image_done_dialog_text">Add image completed!\nIf the card surface of the card pack displays an error, it may be because you entered the same file name as before. You can update it by clearing the cache in the settings.</string>
     <string name="select_image_done_dialog_clear_cache">Clear cache immediately</string>
     <string name="activity_title_add_image">Add image</string>
+    <string name="no_card_app_installed_content">We did not detect the installation of Xiaomi smart card or ColorOS card package on your system. Please check if the target application exists or if permission has been granted</string>
+    <string name="no_card_app_installed_title">No compatible card pack app found</string>
+    <string name="clear_card_cache_succ">Clear cache successfully</string>
+    <string name="clear_card_cache_fail">Clearing cache failed</string>
+    <string name="settings_clear_card_cache">Clear card image cache</string>
+    <string name="settings_title_blacklist">Main interface card blacklist</string>
+    <string name="settings_summary_blacklist">Edit the list of card faces that are not displayed on the main interface</string>
+    <string name="activity_title_black_list">Main interface card blacklist</string>
+    <string name="description">Modify the card face images of HyperOS and ColorOS card packs</string>
 </resources>
