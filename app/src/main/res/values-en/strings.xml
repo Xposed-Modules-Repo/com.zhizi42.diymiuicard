@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DIY MIUI Card</string>
+    <string name="app_name">DIY NFC Card Image</string>
     <string name="text_disable">Disabled</string>
     <string name="text_enable">Hello,LSPosed</string>
     <string name="confirm">confirm</string>
     <string name="confirm_delete_msg">confirm delete all card and image information?</string>
     <string name="cancel">cancel</string>
-    <string name="how_to_use_msg">Usage: 1. Enable module\n2. Open the card package in the settings and find the card to be replaced, making sure to see the image that needs to be replaced\n(ColorOS please confirm that the module is in the background when seeing the image, otherwise it may fail to add)\n3. Go back to the app and scroll down to refresh\n4. After the target image appears, click on the image to the right of the arrow, click the add image button in the middle to add the image, or select an existing image\n5. Reopen the card package, the image should have changed by now</string>
+    <string name="how_to_use_msg">Usage: 1. Enable module\n2. Open the card package in the settings and find the card to be replaced, making sure to see the image that needs to be replaced\n(ColorOS please confirm that the module is in the background when seeing the image, otherwise it may fail to add)\n3. Go back to the app and scroll down to refresh\n4. After the target image appears, click on the image to the right of the arrow, click the add image button in the middle to add the image, or select an existing image\n5. Reopen the card package, the image should have changed by now\ntips：in the main interface, u can long click to delete unnecessary image.</string>
     <string name="how_to_use_title">How to use</string>
     <string name="card_url_title">Card URL</string>
     <string name="input_image_name_title">Select image or input URL</string>

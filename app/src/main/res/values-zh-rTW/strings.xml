@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DIY MIUI NFC卡面</string>
+    <string name="app_name">DIY MIUI NFC卡面圖片</string>
     <string name="text_disable">已禁用</string>
     <string name="text_enable">你好，LSPosed</string>
     <string name="confirm">確認</string>
     <string name="confirm_delete_msg">確認刪除所有卡片和圖片信息嗎？</string>
     <string name="cancel">取消</string>
-    <string name="how_to_use_msg">使用方法：\n1.啟用模塊\n2.打開設置裡的卡包找到要更換的卡，保證看到需要更換的圖像\n（ColorOS在看到圖片時請確認模塊在後臺，否則可能添加失敗）\n3.回到應用下拉刷新\n4.出現目標圖像後點擊箭頭右邊的圖像，點擊中間的添加圖片按鈕以添加圖片，或者選擇已有的圖片\n5.重新打開卡包，此時圖像應已經變化</string>
+    <string name="how_to_use_msg">使用方法：\n1.啟用模塊\n2.打開設置裡的卡包找到要更換的卡，保證看到需要更換的圖像\n（ColorOS在看到圖片時請確認模塊在後臺，否則可能添加失敗）\n3.回到應用下拉刷新\n4.出現目標圖像後點擊箭頭右邊的圖像，點擊中間的添加圖片按鈕以添加圖片，或者選擇已有的圖片\n5.重新打開卡包，此時圖像應已經變化\ntips：主界面長按不需要更改的圖片可以添加至黑名單</string>
     <string name="how_to_use_title">使用說明</string>
     <string name="card_url_title">卡片網址</string>
     <string name="input_image_name_title">選擇圖片或輸入url</string>
