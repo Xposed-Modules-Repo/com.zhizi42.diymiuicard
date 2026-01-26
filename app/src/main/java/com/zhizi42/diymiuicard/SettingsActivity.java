@@ -256,20 +256,26 @@ public class SettingsActivity extends AppCompatActivity implements
 
             //监听设置项的变化同步到remoteprefs
             if (MyXposedService.getService() == null) {
-                return;
-            }
-            SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
-            if (showAllCardsPreference != null) {
-                showAllCardsPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                    remotePrefs.edit().putBoolean("show_all_cards", (Boolean) newValue).apply();
-                    return true;
-                });
-            }
-            if (debugPreference != null) {
-                debugPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                    remotePrefs.edit().putBoolean("debug", (Boolean) newValue).apply();
-                    return true;
-                });
+                if (showAllCardsPreference != null) {
+                    showAllCardsPreference.setEnabled(false);
+                }
+                if (debugPreference != null) {
+                    debugPreference.setEnabled(false);
+                }
+            } else {
+                SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
+                if (showAllCardsPreference != null) {
+                    showAllCardsPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        remotePrefs.edit().putBoolean("show_all_cards", (Boolean) newValue).apply();
+                        return true;
+                    });
+                }
+                if (debugPreference != null) {
+                    debugPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        remotePrefs.edit().putBoolean("debug", (Boolean) newValue).apply();
+                        return true;
+                    });
+                }
             }
         }
 
@@ -308,24 +314,30 @@ public class SettingsActivity extends AppCompatActivity implements
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.custom_hook_preferences, rootKey);
 
+            Preference classPreference = findPreference("class");
+            Preference methodPreference = findPreference("method");
             //监听设置项的变化同步到remoteprefs
             if (MyXposedService.getService() == null) {
-                return;
-            }
-            SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
-            Preference classPreference = findPreference("class");
-            if (classPreference != null) {
-                classPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                    remotePrefs.edit().putString("class", (String) newValue).apply();
-                    return true;
-                });
-            }
-            Preference methodPreference = findPreference("method");
-            if (methodPreference != null) {
-                methodPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                    remotePrefs.edit().putString("method", (String) newValue).apply();
-                    return true;
-                });
+                if (classPreference != null) {
+                    classPreference.setEnabled(false);
+                }
+                if (methodPreference != null) {
+                    methodPreference.setEnabled(false);
+                }
+            } else {
+                SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
+                if (classPreference != null) {
+                    classPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        remotePrefs.edit().putString("class", (String) newValue).apply();
+                        return true;
+                    });
+                }
+                if (methodPreference != null) {
+                    methodPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        remotePrefs.edit().putString("method", (String) newValue).apply();
+                        return true;
+                    });
+                }
             }
         }
     }
