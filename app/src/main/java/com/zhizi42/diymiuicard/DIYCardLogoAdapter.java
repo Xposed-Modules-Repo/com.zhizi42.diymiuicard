@@ -35,7 +35,7 @@ public class DIYCardLogoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         this.cardLogoList = cardLogoList;
         cardLogoNameMap = new LinkedHashMap<>();
         cardLogoNameMap.put("jingjinji.png", "京津冀互联互通卡");
-        cardLogoNameMap.put("shanghai.png", "上海公告交通卡 交通联合版");
+        cardLogoNameMap.put("shanghai.png", "上海公共交通卡 交通联合版");
         cardLogoNameMap.put("qvanchengtong.png", "泉城通");
         cardLogoNameMap.put("yinchuan.png", "银川交通一卡通");
         this.onDIYCardLogoClick = onClick;
