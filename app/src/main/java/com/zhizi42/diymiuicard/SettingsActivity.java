@@ -136,7 +136,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 aboutPreference.setOnPreferenceClickListener(preference -> {
                     new AlertDialog.Builder(requireContext())
                             .setTitle(R.string.settings_title_about)
-                            .setMessage(R.string.settings_about_msg)
+                            .setMessage(getString(R.string.settings_about_msg, BuildConfig.VERSION_NAME))
                             .setPositiveButton(R.string.confirm, null)
                             .show();
                     return true;
@@ -242,7 +242,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     } else if (clickCount >= 4) {
                         clickCount = 0;
                         boolean isOpenNow = ! preferencesPreferences
-                                .getBoolean("dev_mode_open", false);;
+                                .getBoolean("dev_mode_open", false);
                         preferencesPreferences.edit()
                                 .putBoolean("dev_mode_open", isOpenNow).apply();
                         devOptGroupPreference.setVisible(isOpenNow);

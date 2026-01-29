@@ -5,32 +5,25 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.ParcelFileDescriptor;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import dalvik.system.DexClassLoader;
 import io.github.libxposed.api.XposedInterface;
 import io.github.libxposed.api.XposedModule;
-import io.github.libxposed.api.utils.DexParser;
-
-import static android.content.Context.MODE_PRIVATE;
+import io.github.libxposed.api.annotations.AfterInvocation;
+import io.github.libxposed.api.annotations.BeforeInvocation;
+import io.github.libxposed.api.annotations.XposedHooker;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -46,7 +39,6 @@ import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.query.matchers.base.StringMatcher;
 import org.luckypray.dexkit.result.MethodData;
-import org.luckypray.dexkit.result.MethodDataList;
 import org.luckypray.dexkit.wrap.DexMethod;
 
 @Keep
@@ -65,8 +57,10 @@ public class Hook extends XposedModule {
         self = this;
     }
 
+    @Keep
+    @XposedHooker
     public static class HookHyper implements Hooker {
-        @Keep
+        @AfterInvocation
         public static void after(AfterHookCallback callback) {
             //获取替换后的图片路径，不为空就设置hook的函数返回值为路径
             String url = replaceUrl((String) callback.getArgs()[0], 0);
@@ -76,8 +70,10 @@ public class Hook extends XposedModule {
         }
     }
 
+    @Keep
+    @XposedHooker
     public static class HookColor implements Hooker {
-        @Keep
+        @BeforeInvocation
         public static void before(BeforeHookCallback callback) {
             //获取替换后的图片路径，不为空就设置hook的函数参数为路径
             String url = replaceUrl((String) callback.getArgs()[0], 1);
@@ -87,8 +83,10 @@ public class Hook extends XposedModule {
         }
     }
 
+    @Keep
+    @XposedHooker
     public static class HookContext implements Hooker {
-        @Keep
+        @BeforeInvocation
         public static void before(BeforeHookCallback callback) {
             //获取可写入的prefs
             try {

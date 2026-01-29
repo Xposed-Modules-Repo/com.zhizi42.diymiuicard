@@ -15,8 +15,8 @@ android {
         applicationId "com.zhizi42.diymiuicard"
         minSdk 24
         targetSdk 36
-        versionCode 10
-        versionName "2.0.2"
+        versionCode 11
+        versionName "2.1"
 
         ndk {
             //noinspection ChromeOsAbiSupport
@@ -42,6 +42,10 @@ android {
     }
     buildToolsVersion '36.1.0'
     ndkVersion '29.0.14206865'
+
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
