@@ -19,14 +19,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zhizi42.diymiuicard.Hook;
-
 public class Utils {
 
-    public static boolean debug;
+    public static boolean debug = BuildConfig.DEBUG;
 
     public static void setDebug(boolean debug0) {
-        debug = debug0;
+        if (BuildConfig.DEBUG) {
+            debug = true;
+        } else {
+            debug = debug0;
+        }
     }
 
     public static boolean executeShell(List<String> cmd) {
@@ -88,6 +90,8 @@ public class Utils {
                         if (OSType == 0) {
                             commandList.add("am force-stop com.miui.tsmclient");
                             commandList.add("rm -rf /data/data/com.miui.tsmclient/cache/image_manager_disk_cache/*");
+                        } else if (OSType == 1) {
+                            commandList.add("am force-stop com.finshell.wallet");
                         }
                         boolean succ = Utils.executeShell(commandList);
                         activity.runOnUiThread(() -> {
@@ -110,7 +114,7 @@ public class Utils {
 
     public static void debugLog(Hook hook, String s) {
         if (debug) {
-            hook.log(s);
+            hook.log("[DIY NFC Card] " + s);
         }
     }
 

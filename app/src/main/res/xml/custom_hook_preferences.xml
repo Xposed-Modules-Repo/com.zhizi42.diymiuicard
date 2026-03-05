@@ -12,5 +12,11 @@
         android:layout_height="wrap_content"
         app:key="method"
         app:title="Method name" />
+    <EditTextPreference
+        android:defaultValue="String"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Method arg class name"
+        app:key="method_arg" />
 
 </PreferenceScreen>

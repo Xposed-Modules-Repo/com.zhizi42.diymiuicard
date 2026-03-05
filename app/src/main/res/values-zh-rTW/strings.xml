@@ -62,4 +62,6 @@
     <string name="settings_summary_blacklist">編輯不顯示在主界面的卡面名單</string>
     <string name="activity_title_black_list">主界面卡面黑名單</string>
     <string name="description">修改HyperOS和ColorOS卡包卡面圖片</string>
+    <string name="settings_title_FAQ">常見問題</string>
+    <string name="settings_FAQ_msg">常見問題：\n模塊主界面沒有圖片：請確認LSP裡模塊已啟用並勾選作用域，強行停止卡包，在卡包里加載完圖片\n替換了圖片但不生效：如上若仍不生效請確認/data/data/卡包包名/images下存在選擇的圖片文件\n更改了替換圖片但仍顯示舊圖片：設置裡清除卡面圖片緩存\n更新模塊後：請強行停止卡包後再重啟卡包和應用\n若確認模塊是最新版，已重啟卡包和應用仍有故障：請加群反饋</string>
 </resources>

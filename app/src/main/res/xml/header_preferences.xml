@@ -19,8 +19,12 @@
             app:summary="@string/settings_summary_blacklist" />
         <Preference
             android:title="@string/how_to_use_title"
-            app:icon="@drawable/ic_question"
+            app:icon="@drawable/ic_book"
             app:key="how_to_use" />
+        <Preference
+            android:title="@string/settings_title_FAQ"
+            app:icon="@drawable/ic_question"
+            app:key="faq" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="developer option" app:key="dev_opt" app:isPreferenceVisible="false">

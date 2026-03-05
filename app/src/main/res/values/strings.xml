@@ -61,4 +61,6 @@
     <string name="settings_summary_blacklist">编辑不显示在主界面的卡面名单</string>
     <string name="activity_title_black_list">主界面卡面黑名单</string>
     <string name="description">修改HyperOS和ColorOS卡包卡面图片</string>
+    <string name="settings_title_FAQ">常见问题</string>
+    <string name="settings_FAQ_msg">常见问题：\n模块主界面没有图片：请确认LSP里模块已启用并勾选作用域，强行停止卡包，在卡包里加载完图片\n替换了图片但不生效：如上若仍不生效请确认/data/data/卡包包名/images下存在选择的图片文件\n更改了替换图片但仍显示旧图片：设置里清除卡面图片缓存\n更新模块后：请强行停止卡包后再重启卡包和应用\n若确认模块是最新版，已重启卡包和应用仍有故障：请加群反馈</string>
 </resources>

@@ -62,4 +62,6 @@
     <string name="settings_summary_blacklist">Edit the list of card faces that are not displayed on the main interface</string>
     <string name="activity_title_black_list">Main interface card blacklist</string>
     <string name="description">Modify the card face images of HyperOS and ColorOS card packs</string>
+    <string name="settings_title_FAQ">FAQ</string>
+    <string name="settings_FAQ_msg">Common problems:\nThe main interface of the module does not have any images: Please confirm that the module has been enabled in LSP and its scope has been checked. Forcefully stop the card package and load images into it\nReplaced the image but it\'s not working: If the above steps still don\'t work, please confirm that the selected image file exists in /data/data/{system card package name}/images\nThe old image is still displayed even after changing the replacement image: Clear the card image cache in the settings\nAfter updating the module: Please forcefully stop the card package and then restart both the card package and the application\nIf you confirm that the module is the latest version and the card package and application still have issues after being restarted: please join the group to provide feedback</string>
 </resources>

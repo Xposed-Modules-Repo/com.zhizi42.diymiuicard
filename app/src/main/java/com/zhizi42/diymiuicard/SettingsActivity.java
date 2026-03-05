@@ -122,12 +122,16 @@ public class SettingsActivity extends AppCompatActivity implements
                                 .setTitle(R.string.settings_hide_icon_dialog_title)
                                 .setMessage(R.string.settings_hide_icon_dialog_text)
                                 .setNegativeButton(R.string.cancel, null)
-                                .setPositiveButton(R.string.confirm, (dialogInterface, i) -> setAppIconHide(true))
+                                .setPositiveButton(R.string.confirm, (dialogInterface, i) -> {
+                                    setAppIconHide(true);
+                                    hideIconPreference.setChecked(true);
+                                })
                                 .show();
+                        return false;
                     } else {
                         setAppIconHide(false);
+                        return true;
                     }
-                    return true;
                 });
             }
 
@@ -164,6 +168,18 @@ public class SettingsActivity extends AppCompatActivity implements
                         .setMessage(R.string.how_to_use_msg)
                         .setPositiveButton(R.string.confirm, null)
                         .show();
+                    return true;
+                });
+            }
+
+            Preference faqPreference = findPreference("faq");
+            if (faqPreference != null) {
+                faqPreference.setOnPreferenceClickListener(preference -> {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.settings_title_FAQ)
+                            .setMessage(R.string.settings_FAQ_msg)
+                            .setPositiveButton(R.string.confirm, null)
+                            .show();
                     return true;
                 });
             }
@@ -262,6 +278,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 if (debugPreference != null) {
                     debugPreference.setEnabled(false);
                 }
+                if (customHookPreference != null) {
+                    customHookPreference.setEnabled(false);
+                }
             } else {
                 SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
                 if (showAllCardsPreference != null) {
@@ -316,6 +335,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
             Preference classPreference = findPreference("class");
             Preference methodPreference = findPreference("method");
+            Preference methodArgPreference = findPreference("method_arg");
             //监听设置项的变化同步到remoteprefs
             if (MyXposedService.getService() == null) {
                 if (classPreference != null) {
@@ -323,6 +343,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 }
                 if (methodPreference != null) {
                     methodPreference.setEnabled(false);
+                }
+                if (methodArgPreference != null) {
+                    methodArgPreference.setEnabled(false);
                 }
             } else {
                 SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
@@ -335,6 +358,12 @@ public class SettingsActivity extends AppCompatActivity implements
                 if (methodPreference != null) {
                     methodPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                         remotePrefs.edit().putString("method", (String) newValue).apply();
+                        return true;
+                    });
+                }
+                if (methodArgPreference != null) {
+                    methodArgPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        remotePrefs.edit().putString("method_arg", (String) newValue).apply();
                         return true;
                     });
                 }

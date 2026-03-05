@@ -1,7 +1,6 @@
 package com.zhizi42.diymiuicard;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -126,9 +124,7 @@ public class SelectImageActivity extends AppCompatActivity {
         AlertDialog dialogFilename = new AlertDialog.Builder(this)
                 .setTitle(R.string.save_filename_dialog_title)
                 .setView(editText)
-                .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    save(editText.getText().toString() + ".png");
-                })
+                .setPositiveButton(R.string.confirm, (dialog, which) -> save(editText.getText().toString() + ".png"))
                 .setNegativeButton(R.string.cancel, null)
                 .create();
         dialogFilename.setOnShowListener(dialog -> {
@@ -277,8 +273,6 @@ public class SelectImageActivity extends AppCompatActivity {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (resultCode == UCrop.RESULT_ERROR) {
-            final Throwable cropError = UCrop.getError(data);
         }
     }
 
