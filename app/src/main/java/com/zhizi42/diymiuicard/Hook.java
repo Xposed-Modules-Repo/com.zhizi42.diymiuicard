@@ -19,11 +19,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.github.libxposed.api.XposedInterface;
 import io.github.libxposed.api.XposedModule;
-import io.github.libxposed.api.annotations.AfterInvocation;
-import io.github.libxposed.api.annotations.BeforeInvocation;
-import io.github.libxposed.api.annotations.XposedHooker;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -47,70 +43,48 @@ public class Hook extends XposedModule {
 
     private static SharedPreferences sharedPreferences;
     private static SharedPreferences writeSharedPreference;
-    private static Hook self;
-    private int OSType;
+    private int OSType = -1;
+    private static boolean showAllCard;
 
     static {
         System.loadLibrary("dexkit");
     }
 
-    public Hook(@NonNull XposedInterface base, @NonNull ModuleLoadedParam param) {
-        super(base, param);
-        self = this;
-    }
-
     @Keep
-    @XposedHooker
-    public static class HookHyper implements Hooker {
-        @AfterInvocation
-        public static void after(AfterHookCallback callback) {
-            //获取替换后的图片路径，不为空就设置hook的函数返回值为路径
-            String url = replaceUrl((String) callback.getArgs()[0], 0);
-            if (! url.isEmpty()) {
-                callback.setResult(url);
-            }
+    public class MyHooker implements Hooker {
+        boolean loadUrlFromArg;
+        boolean replaceUrlToArg;
+
+        public MyHooker(boolean loadUrlFromArg, boolean replaceUrlToArg) {
+            //this.OSType = OSType;
+            this.loadUrlFromArg = loadUrlFromArg;//图片url是否在函数参数
+            this.replaceUrlToArg = replaceUrlToArg;//返回url是否在函数参数
         }
-    }
 
-    @Keep
-    @XposedHooker
-    public static class HookHyperSuperLand implements Hooker {
-        @AfterInvocation
-        public static void after(AfterHookCallback callback) {
-            //获取替换后的图片路径，不为空就设置hook的函数返回值为路径
-            String url = replaceUrl((String) callback.getResult(), 0);
-            if (! url.isEmpty()) {
-                callback.setResult(url);
-            }
-        }
-    }
-
-    @Keep
-    @XposedHooker
-    public static class HookColor implements Hooker {
-        @BeforeInvocation
-        public static void before(BeforeHookCallback callback) {
-            //获取替换后的图片路径，不为空就设置hook的函数参数为路径
-            String url = replaceUrl((String) callback.getArgs()[0], 1);
-            if (! url.isEmpty()) {
-                callback.getArgs()[0] = url;
-            }
-        }
-    }
-
-    @Keep
-    @XposedHooker
-    public static class HookContext implements Hooker {
-        @BeforeInvocation
-        public static void before(BeforeHookCallback callback) {
-            //获取可写入的prefs
-            try {
-                Context context = (Context) callback.getArgs()[0];
-                writeSharedPreference = new RemotePreferences(
-                        context, "com.zhizi42.diymiuicard.preference", "settings");
-            } catch (Exception e) {
-                self.log("hook context error:");
-                self.log(e.toString());
+        @Override
+        public Object intercept(@NonNull Chain chain) throws Throwable {
+            String originalUrl;
+            if (loadUrlFromArg) {//如果图片url在函数参数
+                originalUrl = (String) chain.getArg(0);//从参数获取url
+                String newUrl = replaceUrl(originalUrl);//得到替换url
+                if (newUrl.isEmpty()) {//如果不用替换
+                    return chain.proceed();//让函数继续执行
+                } else {//如果要替换
+                    if (replaceUrlToArg) {//如果要替换到参数
+                        Object[] args = new Object[]{newUrl};
+                        return chain.proceed(args);
+                    } else {//如果要替换到返回值
+                        return newUrl;
+                    }
+                }
+            } else {
+                originalUrl = (String) chain.proceed();//从函数返回值获取图片url
+                String newUrl = replaceUrl(originalUrl);//获取替换url
+                if (newUrl.isEmpty()) {//如果不用替换
+                    return originalUrl;//返回原url
+                } else {
+                    return newUrl;//返回替换url
+                }
             }
         }
     }
@@ -167,35 +141,121 @@ public class Hook extends XposedModule {
             outputStreamWriter.close();
             bufferedWriter.close();
         } catch (IOException e) {
-            log(e.toString());
+            Utils.utilsLog(this, true, "write method file error:" + e);
         }
     }
 
     @Override
-    public void onPackageLoaded(@NonNull PackageLoadedParam param) {
-        super.onPackageLoaded(param);
+    public void onPackageReady(@NonNull PackageReadyParam param) {
+        super.onPackageReady(param);
         switch (param.getPackageName()) {
             case "com.miui.tsmclient":
                 OSType = 0;
-                hookStart(param);
                 break;
             case "com.finshell.wallet":
                 OSType = 1;
-                hookStart(param);
                 break;
+            case "com.meizu.mznfcpay":
+                OSType = 2;
+                break;
+            default:
+                Utils.utilsLog(this, "not support card package name:" + param.getPackageName());
+                return;
         }
+        prepareHook(param);
     }
 
-    public void hookStart(PackageLoadedParam param) {
+    public void startHook(Method targetMethod, int methodNum) {
+        boolean loadUrlFromArg;
+        boolean replaceUrlToArg;
+        if (OSType == 0) {
+            if (methodNum == 0) {
+                loadUrlFromArg = true;
+                replaceUrlToArg = false;
+            } else if (methodNum == 1) {
+                loadUrlFromArg = true;
+                replaceUrlToArg = true;
+            } else if (methodNum == 10) {//如果是hook超级岛方法
+                loadUrlFromArg = false;
+                replaceUrlToArg = false;
+            } else {
+                return;
+            }
+        } else if (OSType == 1) {
+            loadUrlFromArg = true;
+            replaceUrlToArg = true;
+        } else if (OSType == 2) {
+            loadUrlFromArg = false;
+            replaceUrlToArg = false;
+        } else {
+            return;
+        }
+
+        if (methodNum == -1) {
+            loadUrlFromArg = sharedPreferences.getBoolean("load_url_from_arg", false);
+            replaceUrlToArg = sharedPreferences.getBoolean("replace_url_to_arg", false);
+            Utils.utilsLog(this, String.format("custom hook loadUrlFromArg:%s, replaceUrlToArg:%s", loadUrlFromArg, replaceUrlToArg));
+        }
+        hook(targetMethod).intercept(new MyHooker(loadUrlFromArg, replaceUrlToArg));
+        Utils.utilsLog(this, String.format("hook method num %s succ", methodNum));
+    }
+
+    public void prepareMethodToHook(String targetClassName, String targetMethodName, String targetMethodArgName, PackageReadyParam param, int methodNum) {
+        Class<?> targetMethodArgClass = String.class;
+        if (! targetMethodArgName.equals("String")) {
+            if (targetMethodArgName.isEmpty()) {
+                targetMethodArgClass = null;
+            } else {
+                try {
+                    targetMethodArgClass = param.getClassLoader().loadClass(targetMethodArgName);
+                } catch (ClassNotFoundException e) {
+                    Utils.utilsLog(this, true, "method arg class not found:" + targetMethodArgName);
+                    return;
+                }
+            }
+        }
+
+        Method targetMethod;
+        try {
+            Class<?> targetClass = Class.forName(targetClassName, true, param.getClassLoader());
+            if (targetMethodArgClass == null) {
+                targetMethod = targetClass.getDeclaredMethod(targetMethodName);
+            } else {
+                targetMethod = targetClass.getDeclaredMethod(targetMethodName, targetMethodArgClass);
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            Utils.utilsLog(this, true, String.format("no such target method, error:%s, class:%s, method:%s, method arg class:%s", e, targetClassName, targetMethodName, (targetMethodArgClass == null) ? "null" : targetMethodArgClass.toString()));
+            if (methodNum != -1) {
+                positionMethod(param, methodNum);
+            }
+            return;
+        }
+
+        startHook(targetMethod, methodNum);
+    }
+
+    public void prepareHook(PackageReadyParam param) {
         sharedPreferences = getRemotePreferences("settings");
         Utils.setDebug(sharedPreferences.getBoolean("debug", false));
+        showAllCard = sharedPreferences.getBoolean("show_all_cards", false);
+        boolean superLandEnabled = sharedPreferences.getBoolean("super_land", false);
 
         try {
             Method attachMethod = Application.class.getDeclaredMethod("attach", Context.class);
-            hook(attachMethod, HookContext.class);
-            Utils.debugLog(this, "hook context succ");
+            hook(attachMethod).intercept(chain -> {
+                //获取可写入的prefs
+                try {
+                    Context context = (Context) chain.getArg(0);
+                    writeSharedPreference = new RemotePreferences(
+                            context, "com.zhizi42.diymiuicard.preference", "settings");
+                } catch (Exception e) {
+                    Utils.utilsLog(this, true, "hook context error:" + e);
+                }
+                return chain.proceed();
+            });
+            Utils.utilsLog(this, "hook context succ");
         } catch (NoSuchMethodException e) {
-            Utils.debugLog(this, String.format("hook context error:%s", e));
+            Utils.utilsLog(this, String.format("hook context error:%s", e));
         }
 
         String imagesDirPath;
@@ -203,6 +263,8 @@ public class Hook extends XposedModule {
             imagesDirPath = "/data/data/com.miui.tsmclient/files/images";
         } else if (OSType == 1) {
             imagesDirPath = "/data/data/com.finshell.wallet/files/images";
+        } else if (OSType == 2) {
+            imagesDirPath = "/data/data/com.meizu.mznfcpay/files/images";
         } else {
             return;
         }
@@ -211,109 +273,92 @@ public class Hook extends XposedModule {
             file.mkdir();
         }
 
-        String targetClassName;
-        String targetMethodName;
-        Class<?> targetMethodArgClass = String.class;
 
-        String[] methodArray = readMethodFile("zhizi42.diycard.method.txt");
-        if (methodArray.length != 2) {
-            Utils.debugLog(self, "read method error, pos method");
-            positionMethod(param);
-            return;
-        }
-        targetClassName = methodArray[0];
-        targetMethodName = methodArray[1];
+        String customClassName = sharedPreferences.getString("class", "");
+        String customMethodName = sharedPreferences.getString("method", "");
+        if ((! customClassName.isEmpty()) && (! customMethodName.isEmpty())) {
+            String customMethodArgName = sharedPreferences.getString("method_arg", "");
+            Utils.utilsLog(this, String.format("have custom hook point, class:%s, method:%s, method_arg:%s", customClassName, customMethodName, customMethodArgName));
+            prepareMethodToHook(customClassName, customMethodName, customMethodArgName, param, -1);
+        } else {
+            String[] methodArray = readMethodFile("zhizi42.diycard.method.txt");
+            if (methodArray.length != 2) {
+                Utils.utilsLog(this, true, "read method error, pos method");
+                positionMethod(param, 0);
+                return;
+            }
+            prepareMethodToHook(methodArray[0], methodArray[1], "String", param, 0);
 
-        String settingClassName = sharedPreferences.getString("class", "");
-        String settingMethodName = sharedPreferences.getString("method", "");
-        String settingMethodArgName = sharedPreferences.getString("method_arg", "");
-        if ((! settingClassName.isEmpty()) & (! settingMethodName.isEmpty())) {
-            targetClassName = settingClassName;
-            targetMethodName = settingMethodName;
-            if (! settingMethodArgName.equals("String")) {
-                if (settingMethodArgName.isEmpty()) {
-                    targetMethodArgClass = null;
-                } else {
-                    try {
-                        targetMethodArgClass = param.getClassLoader().loadClass(settingMethodArgName);
-                    } catch (ClassNotFoundException e) {
-                        log(String.format("setting method arg class not found:%s", settingMethodArgName));
+            if (OSType == 0) {
+                methodArray = readMethodFile("zhizi42.diycard.method.1.txt");
+                if (methodArray.length != 2) {
+                    Utils.utilsLog(this, true, "read method error, pos method");
+                    positionMethod(param, 1);
+                    return;
+                }
+                prepareMethodToHook(methodArray[0], methodArray[1], "String", param, 1);
+
+                if (superLandEnabled) {
+                    String[] hyperSuperLandMethodArray = readMethodFile("zhizi42.diycard.HyperSuperLand.method.txt");
+                    if (hyperSuperLandMethodArray.length != 2) {
+                        Utils.utilsLog(this, "read super land method error, pos method");
+                        positionMethod(param, 10);
+                        return;
                     }
+                    prepareMethodToHook(hyperSuperLandMethodArray[0], hyperSuperLandMethodArray[1], "com.miui.tsmclient.entity.CardInfo", param, 10);
+                    Utils.utilsLog(this, "hook hyper os super land succ");
                 }
             }
         }
-
-        try {
-            Class<?> targetClass = param.getClassLoader().loadClass(targetClassName);
-            Method targetMethod;
-            if (targetMethodArgClass == null) {
-                targetMethod = targetClass.getDeclaredMethod(targetMethodName);
-            } else {
-                targetMethod = targetClass.getDeclaredMethod(targetMethodName, targetMethodArgClass);
-            }
-
-            if (OSType == 0) {
-                hook(targetMethod, HookHyper.class);
-            } else if (OSType == 1) {
-                hook(targetMethod, HookColor.class);
-            }
-            Utils.debugLog(this, "hook main method succ");
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
-            Utils.debugLog(this, String.format(
-                    "first hook error no such method, error:%s, class:%s, method:%s, method arg class:%s, try positioning method.",
-                    e, targetClassName, targetMethodName, (targetMethodArgClass == null) ? "null" : targetMethodArgClass.toString()));
-            positionMethod(param);
-        }
-
-        if (OSType == 0) {
-            String[] hyperSuperLandMethodArray = readMethodFile("zhizi42.diycard.HyperSuperLand.method.txt");
-            if (hyperSuperLandMethodArray.length != 2) {
-                Utils.debugLog(self, "read super land method error, pos method");
-                positionMethod(param, true);
-                return;
-            }
-
-            String targetSuperLandClassName = hyperSuperLandMethodArray[0];
-            String targetSuperLandMethodName = hyperSuperLandMethodArray[1];
-
-            try {
-                Class<?> cardInfo = param.getClassLoader().loadClass("com.miui.tsmclient.entity.CardInfo");
-                Class<?> targetSuperLandClass = param.getClassLoader().loadClass(targetSuperLandClassName);
-                Method targetSuperLandMethod = targetSuperLandClass.getDeclaredMethod(targetSuperLandMethodName, cardInfo);
-                hook(targetSuperLandMethod, HookHyperSuperLand.class);
-                Utils.debugLog(this, "hook hyper os super land succ");
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
-                Utils.debugLog(this, String.format(
-                        "first hook error no such method, error:%s, class:%s, method:%s, try positioning method.",
-                        e, targetSuperLandClassName, targetSuperLandMethodName
-                        ));
-                positionMethod(param, true);
-            }
-        }
     }
 
-    public void positionMethod(PackageLoadedParam param) {
-        positionMethod(param, false);
-    }
-
-    public void positionMethod(PackageLoadedParam param, boolean isSuperLand) {
+    public void positionMethod(PackageReadyParam param, int methodNum) {
             ApplicationInfo appInfo = param.getApplicationInfo();
             String apkPath = appInfo.sourceDir;
             try (DexKitBridge dexKitBridge = DexKitBridge.create(apkPath)) {
                 MethodDataList methodDataList;
                 if (OSType == 0) {
-                    if (! isSuperLand) {
-                        methodDataList = dexKitBridge.findClass(FindClass.create()
+                    if (methodNum == 0) {
+                        methodDataList = dexKitBridge.findClass(FindClass
+                                .create()
                                 .searchPackages("com.miui.tsmclient.util")
-                        ).findMethod(FindMethod.create()
-                                .matcher(MethodMatcher.create()
+                                .matcher(
+                                        ClassMatcher
+                                                .create()
+                                                .source("CustomGlideUrl.java")
+                                )
+                        ).findMethod(FindMethod
+                                .create()
+                                .matcher(MethodMatcher
+                                        .create()
                                         .paramCount(1)
                                         .paramTypes(String.class)
                                         .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                                         .returnType(Object.class)
                                 )
                         );
-                    } else {
+                    } else if (methodNum == 1) {
+                        methodDataList = dexKitBridge.findClass(FindClass
+                                .create()
+                                .searchPackages("com.bumptech.glide")
+                                .matcher(
+                                        ClassMatcher.create()
+                                                .source("RequestManager.java")
+                                )
+                        ).findMethod(FindMethod
+                                .create()
+                                .matcher(MethodMatcher
+                                        .create()
+                                        .paramCount(1)
+                                        .paramTypes(String.class)
+                                        .modifiers(Modifier.PUBLIC)
+                                        .returnType(
+                                                "com.bumptech.glide",
+                                                StringMatchType.StartsWith
+                                        )
+                                )
+                        );
+                    } else if (methodNum == 10) {//定位小米超级岛
                         methodDataList = dexKitBridge.findClass(FindClass.create()
                                 .searchPackages("com.miui.tsmclient.util")
                         ).findMethod(FindMethod.create()
@@ -324,16 +369,26 @@ public class Hook extends XposedModule {
                                         .returnType(String.class)
                                 )
                         );
+                    } else {
+                        return;
                     }
                 } else if (OSType == 1) {
-                    methodDataList = dexKitBridge.findClass(FindClass.create().matcher(
-                            ClassMatcher.create()
+                    methodDataList = dexKitBridge.findClass(FindClass
+                                    .create()
+                                    .matcher(
+                            ClassMatcher
+                                    .create()
                                     .className("com.finshell.finui.widget.imageview.CircleNetworkImageView")))
-                            .findMethod(FindMethod.create().matcher(MethodMatcher.create()
+                            .findMethod(FindMethod
+                                    .create()
+                                    .matcher(MethodMatcher
+                                            .create()
                                             .paramCount(1)
                                             .paramTypes(String.class)
                                             .modifiers(Modifier.PRIVATE)
-                                            .returnType(ClassMatcher.create().className(
+                                            .returnType(ClassMatcher
+                                                    .create()
+                                                    .className(
                                                     StringMatcher.create(
                                                             "com.bumptech.glide.integration.okhttp3",
                                                             StringMatchType.StartsWith)
@@ -344,51 +399,43 @@ public class Hook extends XposedModule {
                     return;
                 }
                 if (methodDataList.getSize() != 1) {
-                    log(String.format("pos target method result num not 1, OS Type:%s, is Super Land:%s, positioning target method num is:%s", OSType, isSuperLand, methodDataList.getSize()));
+                    Utils.utilsLog(this, true, String.format("pos target method result num not 1, OS Type:%s, method num:%s, positioning target method num is:%s", OSType, methodNum, methodDataList.getSize()));
                     for (MethodData method:methodDataList) {
-                        log(String.format("class name:%s, method name:%s", method.getClassName(), method.getMethodName()));
+                        Utils.utilsLog(this, true, String.format("class name:%s, method name:%s", method.getClassName(), method.getMethodName()));
                     }
                     return;
                 }
                 MethodData methodData = methodDataList.single();
                 Method method = methodData.getMethodInstance(param.getClassLoader());
                 DexMethod dexMethod = methodData.toDexMethod();
-                updateTargetHookName(dexMethod.getClassName(), dexMethod.getName(), isSuperLand);
-                if (OSType == 0) {
-                    if (! isSuperLand) {
-                        hook(method, HookHyper.class);
-                    } else {
-                        hook(method, HookHyperSuperLand.class);
-                    }
-                } else if (OSType == 1) {
-                    hook(method, HookColor.class);
-                }
+                updateTargetHookName(dexMethod.getClassName(), dexMethod.getName(), methodNum);
+                startHook(method, methodNum);
             } catch (NoSuchMethodException | NoResultException e) {
-                log("positioning target method and hook still error, message:" + e);
+                Utils.utilsLog(this, true, "positioning target method and hook still error, message:" + e);
             }
     }
 
-    public static String replaceUrl(String url, int OSType) {
-        Utils.debugLog(self, "load image's url:" + url);//记录加载的图片链接到log
+    public String replaceUrl(String url) {
+        Utils.utilsLog(this, "load image's url:" + url);//记录加载的图片链接到log
+        if (sharedPreferences.getBoolean("test_mode", false)) {
+            return "https://home.zhizi42.top:555/test_card.png";
+        }
 
-        boolean showAllCard = sharedPreferences.getBoolean("show_all_cards", false);
         if (showAllCard) {
             updateCardUrlList(url);//如果是显示所有卡片就直接添加到应用数据
         } else {
             if (OSType == 0) {
-                if (!(url.contains("w270h480") || url.contains("/door-card-img/logo/"))) {
+                if (! (url.contains("w270h480") || url.contains("/door-card-img/logo/") || url.contains("/Mibi/"))) {
                     updateCardUrlList(url);//如果不是显示所有卡片，不是小图标才添加到数据
                 }
-            } else if (OSType == 1) {
-                updateCardUrlList(url);
             } else {
-                return "";
+                updateCardUrlList(url);
             }
         }
 
         String imageName = sharedPreferences.getString(url, "");//获取原卡面图片对应的diy卡面
         if (!imageName.isEmpty()) {//如果diy卡面不为空
-            Utils.debugLog(self, "load image's diy image name:" + imageName);
+            Utils.utilsLog(this, "load image's diy image name:" + imageName);
             String imageUrl;
             if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
                 imageUrl = imageName;//如果是链接就直接设置为结果
@@ -406,36 +453,45 @@ public class Hook extends XposedModule {
                 if (sharedPreferences.getBoolean("debug", false)) {
                     File file = new File(imagePath);
                     if (file.exists()) {
-                        Utils.debugLog(self, "diy image file exist");
+                        Utils.utilsLog(this, "diy image file exist");
                     } else {
-                        Utils.debugLog(self, "diy image file not exist");
+                        Utils.utilsLog(this, "diy image file not exist");
                     }
                 }
             }
             return imageUrl;
         } else {
-            Utils.debugLog(self, "load image's not have diy image");
+            Utils.utilsLog(this, "load image's not have diy image");
             return "";
         }
     }
 
-    public void updateTargetHookName(String targetClassName, String targetMethodName, boolean isSuperLand) {
-        String name = "zhizi42.diycard.method.txt";
-        if (isSuperLand) {
+    public void updateTargetHookName(String targetClassName, String targetMethodName, int methodNum) {
+        String name;
+        if (methodNum == 0) {
+            name = "zhizi42.diycard.method.txt";
+        } else if (methodNum == 1) {
+            name = "zhizi42.diycard.method.1.txt";
+        } else if (methodNum == 10) {
             name = "zhizi42.diycard.HyperSuperLand.method.txt";
+        } else {
+            return;
         }
         writeMethodFile(name, targetClassName, targetMethodName);
     }
 
-    public static void updateCardUrlList(String newCardUrl) {
-        if (writeSharedPreference != null) {
-            SharedPreferences.Editor editor = writeSharedPreference.edit();
-            Set<String> cardUrlSet = new HashSet<>(writeSharedPreference.getStringSet("all_card_url_set", new HashSet<>()));
-            cardUrlSet.add(newCardUrl);
-            editor.putStringSet("all_card_url_set", cardUrlSet);
-            editor.apply();
-        } else {
-            Utils.debugLog(self, "when update card url, write shared pref is null");
+    public void updateCardUrlList(String newCardUrl) {
+        Set<String> blackSet = sharedPreferences.getStringSet("black_card_url_set", new HashSet<>());//获取黑名单列表
+        if (! blackSet.contains(newCardUrl)) {//如果不在黑名单里就添加到所有卡片列表
+            if (writeSharedPreference != null) {
+                SharedPreferences.Editor editor = writeSharedPreference.edit();
+                Set<String> cardUrlSet = new HashSet<>(writeSharedPreference.getStringSet("all_card_url_set", new HashSet<>()));
+                cardUrlSet.add(newCardUrl);
+                editor.putStringSet("all_card_url_set", cardUrlSet);
+                editor.apply();
+            } else {
+                Utils.utilsLog(this, "when update card url, write shared pref is null");
+            }
         }
     }
 }

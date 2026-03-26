@@ -5,9 +5,9 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/imageViewBlackList"
-        android:layout_width="320dp"
-        android:layout_height="202dp"
+        android:id="@+id/imageViewCardOriginal"
+        android:layout_width="160dp"
+        android:layout_height="101dp"
         android:layout_weight="1"
         app:srcCompat="@drawable/ic_error" />
 </LinearLayout>

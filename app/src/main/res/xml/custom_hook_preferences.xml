@@ -2,21 +2,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditTextPreference
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:singleLine="true"
         app:key="class"
         app:title="Class name" />
     <EditTextPreference
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:singleLine="true"
         app:key="method"
         app:title="Method name" />
     <EditTextPreference
-        android:defaultValue="String"
-        android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Method arg class name"
         app:key="method_arg" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="load_url_from_arg"
+        android:title="load url from arg" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="replace_url_to_arg"
+        android:title="replace url to arg" />
 
 </PreferenceScreen>

@@ -188,6 +188,8 @@ public class SelectImageActivity extends AppCompatActivity {
             path = "/data/data/com.miui.tsmclient/files/images/";
         } else if (OSType == 1) {
             path = "/data/data/com.finshell.wallet/files/images/";
+        } else if (OSType == 2) {
+            path = "/data/data/com.meizu.mznfcpay/files/images";
         } else {
             return;
         }

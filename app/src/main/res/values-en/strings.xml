@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">DIY NFC Card Image</string>
     <string name="text_disable">Disabled</string>
-    <string name="text_enable">Hello,LSPosed</string>
+    <string name="text_enable">LSPosed Enabled</string>
     <string name="confirm">confirm</string>
     <string name="confirm_delete_msg">confirm delete all card and image information?</string>
     <string name="cancel">cancel</string>
-    <string name="how_to_use_msg">Usage: 1. Enable module\n2. Open the card package in the settings and find the card to be replaced, making sure to see the image that needs to be replaced\n(ColorOS please confirm that the module is in the background when seeing the image, otherwise it may fail to add)\n3. Go back to the app and scroll down to refresh\n4. After the target image appears, click on the image to the right of the arrow, click the add image button in the middle to add the image, or select an existing image\n5. Reopen the card package, the image should have changed by now\ntips：in the main interface, u can long click to delete unnecessary image.</string>
+    <string name="how_to_use_msg">Usage: 1. Enable module\n2. Open the card package in the settings and find the card to be replaced, making sure to see the image that needs to be replaced\n(ColorOS please confirm that the module is in the background when seeing the image, otherwise it may fail to add)\n3. Go back to the app and scroll down to refresh\n4. After the target image appears, click on the image to the right of the arrow, click the add image button in the middle to add the image, or select an existing image\n5. Reopen the card package, the image should have changed by now\ntips：in the main interface, u can swipe left to delete unnecessary image.</string>
     <string name="how_to_use_title">How to use</string>
     <string name="card_url_title">Card URL</string>
     <string name="input_image_name_title">Select image or input URL</string>
@@ -63,5 +63,5 @@
     <string name="activity_title_black_list">Main interface card blacklist</string>
     <string name="description">Modify the card face images of HyperOS and ColorOS card packs</string>
     <string name="settings_title_FAQ">FAQ</string>
-    <string name="settings_FAQ_msg">Common problems:\nThe main interface of the module does not have any images: Please confirm that the module has been enabled in LSP and its scope has been checked. Forcefully stop the card package and load images into it\nReplaced the image but it\'s not working: If the above steps still don\'t work, please confirm that the selected image file exists in /data/data/{system card package name}/images\nThe old image is still displayed even after changing the replacement image: Clear the card image cache in the settings\nAfter updating the module: Please forcefully stop the card package and then restart both the card package and the application\nIf you confirm that the module is the latest version and the card package and application still have issues after being restarted: please join the group to provide feedback</string>
+    <string name="settings_FAQ_msg">Common problems:\nThe main interface of the module does not have any images: Please confirm that the module has been enabled in LSP and its scope has been checked. Forcefully stop the card package and load images into it\nReplaced the image but it\'s not working: If the above steps still don\'t work, please confirm that the selected image file exists in /data/data/{system card package name}/files/images\nThe old image is still displayed even after changing the replacement image: Clear the card image cache in the settings\nAfter updating the module: Please forcefully stop the card package and then restart both the card package and the application\nIf you confirm that the module is the latest version and the card package and application still have issues after being restarted: please join the group to provide feedback</string>
 </resources>

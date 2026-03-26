@@ -89,9 +89,10 @@ public class Utils {
                         commandList.add("rm -rf /data/data/com.zhizi42.diymiuicard/cache/*");
                         if (OSType == 0) {
                             commandList.add("am force-stop com.miui.tsmclient");
-                            commandList.add("rm -rf /data/data/com.miui.tsmclient/cache/image_manager_disk_cache/*");
                         } else if (OSType == 1) {
                             commandList.add("am force-stop com.finshell.wallet");
+                        } else if (OSType == 2) {
+                            commandList.add("am force-stop com.meizu.mznfcpay");
                         }
                         boolean succ = Utils.executeShell(commandList);
                         activity.runOnUiThread(() -> {
@@ -112,10 +113,14 @@ public class Utils {
                 .show();
     }
 
-    public static void debugLog(Hook hook, String s) {
-        if (debug) {
-            hook.log("[DIY NFC Card] " + s);
+    public static void utilsLog(Hook hook, boolean error, String s) {
+        if (error || debug) {
+            hook.log(error ? Log.ERROR : Log.DEBUG, "DIY NFC Card", s);
         }
+    }
+
+    public static void utilsLog(Hook hook, String s) {
+        utilsLog(hook, false, s);
     }
 
     public static int checkOSType(Context context) {

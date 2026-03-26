@@ -135,6 +135,13 @@ public class SettingsActivity extends AppCompatActivity implements
                 });
             }
 
+            SwitchPreference SuperLandPreference = findPreference("super_land");
+            if (SuperLandPreference != null) {
+                if (Utils.checkOSType(requireContext()) == 0) {
+                    SuperLandPreference.setVisible(true);
+                }
+            }
+
             LongClickPreference aboutPreference = findPreference("about");
             if (aboutPreference != null) {
                 aboutPreference.setOnPreferenceClickListener(preference -> {
@@ -224,6 +231,8 @@ public class SettingsActivity extends AppCompatActivity implements
                 });
             }
 
+            SwitchPreference testModePreference = findPreference("test_mode");
+
             //如果开启了开发者选项就显示所有被隐藏项，反之亦然
             SharedPreferences preferencesPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
             Preference showAllCardsPreference = findPreference("show_all_cards");
@@ -231,14 +240,12 @@ public class SettingsActivity extends AppCompatActivity implements
             Preference customHookPreference = findPreference("custom_hook");
             Preference devOptGroupPreference = findPreference("dev_opt");
             if (aboutPreference != null &&
-                    showAllCardsPreference != null &&
                     debugPreference != null &&
                     customHookPreference != null &&
                     devOptGroupPreference != null) {
                 boolean isOpen = preferencesPreferences
                         .getBoolean("dev_mode_open", false);
                 devOptGroupPreference.setVisible(isOpen);
-                showAllCardsPreference.setVisible(isOpen);
                 debugPreference.setVisible(isOpen);
                 customHookPreference.setVisible(isOpen);
 
@@ -246,7 +253,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     //连续长按4次就开启开发者选项，显示所有被隐藏项
                     long nowClickTime = System.currentTimeMillis();
                     //如果两次点击时间间隔大于3000ms就重置计数器
-                    if (nowClickTime - lastClickTime > 3000) {
+                    if (nowClickTime - lastClickTime > 5000) {
                         clickCount = 0;
                     }
                     lastClickTime = nowClickTime;
@@ -281,17 +288,32 @@ public class SettingsActivity extends AppCompatActivity implements
                 if (customHookPreference != null) {
                     customHookPreference.setEnabled(false);
                 }
+                if (testModePreference != null) {
+                    testModePreference.setEnabled(false);
+                }
             } else {
-                SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
+                SharedPreferences servicePrefs = MyXposedService.getSharedPreferences();
+                if (SuperLandPreference != null) {
+                    SuperLandPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        servicePrefs.edit().putBoolean("super_land", (boolean) newValue).apply();
+                        return true;
+                    });
+                }
                 if (showAllCardsPreference != null) {
                     showAllCardsPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                        remotePrefs.edit().putBoolean("show_all_cards", (Boolean) newValue).apply();
+                        servicePrefs.edit().putBoolean("show_all_cards", (boolean) newValue).apply();
                         return true;
                     });
                 }
                 if (debugPreference != null) {
                     debugPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                        remotePrefs.edit().putBoolean("debug", (Boolean) newValue).apply();
+                        servicePrefs.edit().putBoolean("debug", (boolean) newValue).apply();
+                        return true;
+                    });
+                }
+                if (testModePreference != null) {
+                    testModePreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        servicePrefs.edit().putBoolean("test_mode", (boolean) newValue).apply();
                         return true;
                     });
                 }
@@ -336,6 +358,8 @@ public class SettingsActivity extends AppCompatActivity implements
             Preference classPreference = findPreference("class");
             Preference methodPreference = findPreference("method");
             Preference methodArgPreference = findPreference("method_arg");
+            SwitchPreference loadUrlFromArgPreference = findPreference("load_url_from_arg");
+            SwitchPreference replaceUrlToArgPreference = findPreference("replace_url_to_arg");
             //监听设置项的变化同步到remoteprefs
             if (MyXposedService.getService() == null) {
                 if (classPreference != null) {
@@ -347,23 +371,41 @@ public class SettingsActivity extends AppCompatActivity implements
                 if (methodArgPreference != null) {
                     methodArgPreference.setEnabled(false);
                 }
+                if (loadUrlFromArgPreference != null) {
+                    loadUrlFromArgPreference.setEnabled(false);
+                }
+                if (replaceUrlToArgPreference != null) {
+                    replaceUrlToArgPreference.setEnabled(false);
+                }
             } else {
-                SharedPreferences remotePrefs = MyXposedService.getService().getRemotePreferences("settings");
+                SharedPreferences servicePrefs = MyXposedService.getSharedPreferences();
                 if (classPreference != null) {
                     classPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                        remotePrefs.edit().putString("class", (String) newValue).apply();
+                        servicePrefs.edit().putString("class", (String) newValue).apply();
                         return true;
                     });
                 }
                 if (methodPreference != null) {
                     methodPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                        remotePrefs.edit().putString("method", (String) newValue).apply();
+                        servicePrefs.edit().putString("method", (String) newValue).apply();
                         return true;
                     });
                 }
                 if (methodArgPreference != null) {
                     methodArgPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                        remotePrefs.edit().putString("method_arg", (String) newValue).apply();
+                        servicePrefs.edit().putString("method_arg", (String) newValue).apply();
+                        return true;
+                    });
+                }
+                if (loadUrlFromArgPreference != null) {
+                    loadUrlFromArgPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        servicePrefs.edit().putBoolean("load_url_from_arg", (boolean) newValue).apply();
+                        return true;
+                    });
+                }
+                if (replaceUrlToArgPreference != null) {
+                    replaceUrlToArgPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                        servicePrefs.edit().putBoolean("replace_url_to_arg", (boolean) newValue).apply();
                         return true;
                     });
                 }

@@ -3,14 +3,15 @@ package com.zhizi42.diymiuicard;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,14 +20,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.zhizi42.diymiuicard.databinding.ActivityMainBinding;
 
 import java.io.File;
+import java.util.List;
 
 import io.github.libxposed.service.XposedService;
 import io.github.libxposed.service.XposedServiceHelper;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private SharedPreferences sharedPreferences;
-    private MainAdapter adapter;
+    private MainCardAdapter adapter;
     private File myImagesFolder;
     private MyImagesAdapter myImagesAdapter;
     private ActivityResultLauncher<Intent> startSelectImageActivity;
@@ -72,18 +74,26 @@ public class MainActivity extends AppCompatActivity {
             sharedPreferences.edit().putBoolean("first_run", false).apply();
         }//如果第一次启动为默认true就显示使用说明并把第一次启动设置为false
 
+        //设置主界面的主卡片列表
         RecyclerView recyclerView = binding.recyclerView;
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);//设置列表为垂直方向
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new MainAdapter(this);
+        adapter = new MainCardAdapter(this);
         recyclerView.setAdapter(adapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new MyItemSwipeCallback(
+                adapter,
+                AppCompatResources.getDrawable(this, R.drawable.ic_archive),
+                Color.rgb(233, 0, 0)
+        ));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         //设置主界面下拉刷新
         binding.swipeRefreshLayout.setOnRefreshListener(() -> {
             adapter.refresh();
             binding.swipeRefreshLayout.setRefreshing(false);
         });
+        adapter.refresh();
 
         //如果本地图片文件夹不存在就新建
         myImagesFolder = new File("/data/data/com.zhizi42.diymiuicard/files/images/");
@@ -124,23 +134,25 @@ public class MainActivity extends AppCompatActivity {
 
                 binding.textView.setText(R.string.text_enable);
 
-                adapter.refresh();//刷新适配器的数据
                 int OSType = Utils.checkOSType(context);
                 String packageName;
                 if (OSType == 0) {
                     packageName = "com.miui.tsmclient";
                 } else if (OSType == 1) {
                     packageName = "com.finshell.wallet";
+                } else if (OSType == 2) {
+                    packageName = "com.meizu.mznfcpay";
                 } else {
-                    packageName = "";
                     Utils.showNoCardApp(context);
+                    return;
                 }
+                List<String> packages = List.of(packageName);
                 if (! MyXposedService.getService().getScope().contains(packageName)) {
                     new AlertDialog.Builder(context)
                             .setTitle("请添加卡包APP到作用域")
                             .setMessage("模块作用域没有卡包APP，请点击确定后，同意添加卡包APP到本模块作用域。")
                             .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                                MyXposedService.getService().requestScope(packageName, new XposedService.OnScopeEventListener() {});
+                                MyXposedService.getService().requestScope(packages, new XposedService.OnScopeEventListener() {});
                             })
                             .show();
                 }

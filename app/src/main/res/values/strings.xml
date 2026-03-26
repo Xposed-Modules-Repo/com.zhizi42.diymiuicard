@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">DIY NFC卡面图片</string>
     <string name="text_disable">已禁用</string>
-    <string name="text_enable">你好，LSPosed</string>
+    <string name="text_enable">LSPosed已启用</string>
     <string name="confirm">确认</string>
     <string name="confirm_delete_msg">确认删除所有卡片和图片信息吗？</string>
     <string name="cancel">取消</string>
-    <string name="how_to_use_msg">使用方法： 1.启用模块\n2.打开设置里的卡包找到要更换的卡，保证看到需要更换的图像\n（ColorOS在看到图片时请确认模块在后台，否则可能添加失败）\n3.回到应用下拉刷新\n4.出现目标图像后点击箭头右边的图像，点击中间的添加图片按钮以添加图片，或者选择已有的图片\n5.重新打开卡包，此时图像应已经变化\ntips：主界面长按不需要更改的图片可以添加至黑名单</string>
+    <string name="how_to_use_msg">使用方法： 1.启用模块\n2.打开设置里的卡包找到要更换的卡，保证看到需要更换的图像\n（ColorOS在看到图片时请确认模块在后台，否则可能添加失败）\n3.回到应用下拉刷新\n4.出现目标图像后点击箭头右边的图像，点击中间的添加图片按钮以添加图片，或者选择已有的图片\n5.重新打开卡包，此时图像应已经变化\ntips：主界面往左划不需要更改的图片可以添加至黑名单</string>
     <string name="how_to_use_title">使用说明</string>
     <string name="card_url_title">卡片网址</string>
     <string name="input_image_name_title">选择图片或输入url</string>
@@ -62,5 +62,5 @@
     <string name="activity_title_black_list">主界面卡面黑名单</string>
     <string name="description">修改HyperOS和ColorOS卡包卡面图片</string>
     <string name="settings_title_FAQ">常见问题</string>
-    <string name="settings_FAQ_msg">常见问题：\n模块主界面没有图片：请确认LSP里模块已启用并勾选作用域，强行停止卡包，在卡包里加载完图片\n替换了图片但不生效：如上若仍不生效请确认/data/data/卡包包名/images下存在选择的图片文件\n更改了替换图片但仍显示旧图片：设置里清除卡面图片缓存\n更新模块后：请强行停止卡包后再重启卡包和应用\n若确认模块是最新版，已重启卡包和应用仍有故障：请加群反馈</string>
+    <string name="settings_FAQ_msg">常见问题：\n模块主界面没有图片：请确认LSP里模块已启用并勾选作用域，强行停止卡包，在卡包里加载完图片\n替换了图片但不生效：如上若仍不生效请确认/data/data/卡包包名/files/images下存在选择的图片文件\n更改了替换图片但仍显示旧图片：设置里清除卡面图片缓存\n更新模块后：请强行停止卡包后再重启卡包和应用\n若确认模块是最新版，已重启卡包和应用仍有故障：请加群反馈</string>
 </resources>
