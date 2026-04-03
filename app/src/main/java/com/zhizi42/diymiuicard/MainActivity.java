@@ -140,8 +140,6 @@ public class MainActivity extends AppCompatActivity {
                     packageName = "com.miui.tsmclient";
                 } else if (OSType == 1) {
                     packageName = "com.finshell.wallet";
-                } else if (OSType == 2) {
-                    packageName = "com.meizu.mznfcpay";
                 } else {
                     Utils.showNoCardApp(context);
                     return;

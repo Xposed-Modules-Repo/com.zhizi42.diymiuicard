@@ -141,12 +141,7 @@ public class Utils {
                 context.getPackageManager().getPackageInfo("com.finshell.wallet", PackageManager.GET_META_DATA);
                 return 1;
             } catch (PackageManager.NameNotFoundException e1) {
-                try {
-                    context.getPackageManager().getPackageInfo("com.meizu.mznfcpay", PackageManager.GET_META_DATA);
-                    return 2;
-                } catch (PackageManager.NameNotFoundException e2) {
-                    return -1;
-                }
+                return -1;
             }
         }
     }

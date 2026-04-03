@@ -142,9 +142,6 @@ public class Hook extends XposedModule {
             case "com.finshell.wallet":
                 OSType = 1;
                 break;
-            case "com.meizu.mznfcpay":
-                OSType = 2;
-                break;
             default:
                 Utils.utilsLog(this, "not support card package name:" + param.getPackageName());
                 return;
