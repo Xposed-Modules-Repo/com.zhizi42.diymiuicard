@@ -16,10 +16,6 @@
             app:isPreferenceVisible="false"
             app:summary="开启后会包含小米超级岛显示的图片（仅HyperOS3最新版卡包可用）" />
         <Preference
-            android:title="@string/settings_clear_card_cache"
-            app:icon="@drawable/ic_delete"
-            app:key="delete_image_cache" />
-        <Preference
             android:title="@string/settings_title_blacklist"
             app:icon="@drawable/ic_black_list"
             app:key="black_list"
@@ -38,15 +34,27 @@
             app:key="test_mode"
             app:summaryOff="开启后会尝试替换所有能加载的图片"
             app:summaryOn="现在会尝试替换所有能加载的图片" />
+        <Preference
+            android:title="@string/settings_title_clear_card_cache"
+            app:key="delete_image_cache" />
+        <Preference
+            android:title="@string/settings_title_clear_hook_cache"
+            app:key="clear_hook_cache"
+            app:isPreferenceVisible="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="developer option"
+        app:key="dev_opt"
+        app:isPreferenceVisible="false">
+
         <SwitchPreference
             android:defaultValue="false"
             android:title="@string/settings_title_show_all_cards"
             app:key="show_all_cards"
             app:summaryOff="@string/settings_summary_show_all_cards_off"
-            app:summaryOn="@string/settings_summary_show_all_cards_on" />
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="developer option" app:key="dev_opt" app:isPreferenceVisible="false">
+            app:summaryOn="@string/settings_summary_show_all_cards_on"
+            app:isPreferenceVisible="false"/>
         <SwitchPreference
             android:defaultValue="false"
             android:title="@string/settings_title_debug"

@@ -32,7 +32,7 @@
     <string name="settings_title_donate">Buy coffee for developers</string>
     <string name="settings_title_no_money_plan">No Money Plan</string>
     <string name="donate_call_alipay_text">Open Alipay directly to donate</string>
-    <string name="settings_dialog_text_no_money">This application has joined the no money plan and promises to be used for free without any additional features.</string>
+    <string name="settings_no_money_dialog_text">This application has joined the no money plan and promises to be used for free without any additional features.</string>
     <string name="settings_dialog_button_text_no_money_link">Open the website for the No Money Plan</string>
     <string name="settings_open_qq_fail">Failed to open QQ, please check if the latest version of QQ is installed on your phone</string>
     <string name="input_image_tips_text">Click on the image to select, click the \"Add Image\" button below to add an image (requires root permission), long press the image to delete it, and click \"Clear Selected\" to restore the original image</string>
@@ -47,8 +47,8 @@
     <string name="select_image_save_copy_error_toast">Copy file failed, please confirm granting root permission and contact the developer</string>
     <string name="select_image_tips">Clicking confirm to add will add the current preview image style to the application card package image library.\nAt present, the one click add card face logo function only supports the Beijing Tianjin Hebei Interconnection Card, Shanghai Public Transport Card Traffic Union Edition, Quancheng Pass, and Yinchuan Transportation One Card.\nDue to the author\'s limited skills and energy, they will not provide all transportation card faces and other card faces.\nIf you have the ability, you can take out the desired card logo image and hand it over to the author, who will add it to the application.</string>
     <string name="select_image_button_tips">Instructions</string>
-    <string name="settings_clear_cache_dialog_title">Clear cache?</string>
-    <string name="settings_clear_cache_dialog_text">Are you sure you want to clear the image loading cache of yourself and your Xiaomi smart card and forcefully stop the Xiaomi smart card?\nClearing may correct image loading errors, but it will prolong loading time.\nAfter clearing, please restart this application for it to take effect.</string>
+    <string name="settings_clear_cache_dialog_title">Clear module image cache?</string>
+    <string name="settings_clear_cache_dialog_text">Are you sure you want to clear the image cache of module?\nClearing may correct image loading errors.\nAfter clearing, please restart this application for it to take effect.</string>
     <string name="select_image_done_dialog_title">Add image completed</string>
     <string name="select_image_done_dialog_text">Add image completed!\nIf the card surface of the card pack displays an error, it may be because you entered the same file name as before. You can update it by clearing the cache in the settings.</string>
     <string name="select_image_done_dialog_clear_cache">Clear cache immediately</string>
@@ -56,12 +56,15 @@
     <string name="no_card_app_installed_content">We did not detect the installation of Xiaomi smart card or ColorOS card package on your system. Please check if the target application exists or if permission has been granted</string>
     <string name="no_card_app_installed_title">No compatible card pack app found</string>
     <string name="clear_card_cache_succ">Clear cache successfully</string>
-    <string name="clear_card_cache_fail">Clearing cache failed</string>
-    <string name="settings_clear_card_cache">Clear card image cache</string>
+    <string name="clear_card_cache_fail">Clear cache failed</string>
+    <string name="settings_title_clear_card_cache">clear module image cache</string>
     <string name="settings_title_blacklist">Main interface card blacklist</string>
     <string name="settings_summary_blacklist">Edit the list of card faces that are not displayed on the main interface</string>
     <string name="activity_title_black_list">Main interface card blacklist</string>
     <string name="description">Modify the card face images of HyperOS and ColorOS card packs</string>
     <string name="settings_title_FAQ">FAQ</string>
     <string name="settings_FAQ_msg">Common problems:\nThe main interface of the module does not have any images: Please confirm that the module has been enabled in LSP and its scope has been checked. Forcefully stop the card package and load images into it\nReplaced the image but it\'s not working: If the above steps still don\'t work, please confirm that the selected image file exists in /data/data/{system card package name}/files/images\nThe old image is still displayed even after changing the replacement image: Clear the card image cache in the settings\nAfter updating the module: Please forcefully stop the card package and then restart both the card package and the application\nIf you confirm that the module is the latest version and the card package and application still have issues after being restarted: please join the group to provide feedback</string>
+    <string name="settings_title_clear_hook_cache">clear hook point cache</string>
+    <string name="settings_clear_hook_cache_dialog_title">Clear hook point cache?</string>
+    <string name="settings_clear_hook_cache_dialog_text">Clear the hook point cache?\nClearing it may solve the issue of not being able to load the target image.\nAfter clearing, the wallet will automatically stop running.</string>
 </resources>

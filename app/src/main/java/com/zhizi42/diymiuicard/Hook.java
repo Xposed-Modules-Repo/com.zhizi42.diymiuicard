@@ -45,6 +45,7 @@ public class Hook extends XposedModule {
     private static SharedPreferences writeSharedPreference;
     private int OSType = -1;
     private static boolean showAllCard;
+    private DexKitBridge dexKitBridge = null;
 
     static {
         System.loadLibrary("dexkit");
@@ -91,14 +92,7 @@ public class Hook extends XposedModule {
 
     private String[] readMethodFile(String name) {
         //读取缓存的类名和方法名
-        String path;
-        if (OSType == 0) {
-            path = "/data/data/com.miui.tsmclient/files/";
-        } else if (OSType == 1) {
-            path = "/data/data/com.finshell.wallet/files/";
-        } else {
-            return new String[0];
-        }
+        String path = Utils.getWalletPath(OSType) + "files/";
         try {
             File methodFile = new File(path, name);
             FileInputStream inputStream = new FileInputStream(methodFile);
@@ -120,14 +114,7 @@ public class Hook extends XposedModule {
 
     private void writeMethodFile(String name, String className, String methodName) {
         //写入类名-换行-写入方法名到缓存文件
-        String path;
-        if (OSType == 0) {
-            path = "/data/data/com.miui.tsmclient/files/";
-        } else if (OSType == 1) {
-            path = "/data/data/com.finshell.wallet/files/";
-        } else {
-            return;
-        }
+        String path = Utils.getWalletPath(OSType) + "files/";
         File methodFile = new File(path, name);
         try {
             FileOutputStream outputStream = new FileOutputStream(methodFile);
@@ -194,8 +181,8 @@ public class Hook extends XposedModule {
         if (methodNum == -1) {
             loadUrlFromArg = sharedPreferences.getBoolean("load_url_from_arg", false);
             replaceUrlToArg = sharedPreferences.getBoolean("replace_url_to_arg", false);
-            Utils.utilsLog(this, String.format("custom hook loadUrlFromArg:%s, replaceUrlToArg:%s", loadUrlFromArg, replaceUrlToArg));
         }
+        Utils.utilsLog(this, String.format("start hook method, class name:%s, method name:%s, loadUrlFromArg:%s, replaceUrlToArg:%s, method num:%s", targetMethod.getDeclaringClass().getName(), targetMethod.getName(), loadUrlFromArg, replaceUrlToArg, methodNum));
         hook(targetMethod).intercept(new MyHooker(loadUrlFromArg, replaceUrlToArg));
         Utils.utilsLog(this, String.format("hook method num %s succ", methodNum));
     }
@@ -258,16 +245,7 @@ public class Hook extends XposedModule {
             Utils.utilsLog(this, String.format("hook context error:%s", e));
         }
 
-        String imagesDirPath;
-        if (OSType == 0) {
-            imagesDirPath = "/data/data/com.miui.tsmclient/files/images";
-        } else if (OSType == 1) {
-            imagesDirPath = "/data/data/com.finshell.wallet/files/images";
-        } else if (OSType == 2) {
-            imagesDirPath = "/data/data/com.meizu.mznfcpay/files/images";
-        } else {
-            return;
-        }
+        String imagesDirPath = Utils.getWalletPath(OSType) + "files/images";
         @SuppressLint("SdCardPath") File file = new File(imagesDirPath);
         if (!file.exists()) {
             file.mkdir();
@@ -281,156 +259,155 @@ public class Hook extends XposedModule {
             Utils.utilsLog(this, String.format("have custom hook point, class:%s, method:%s, method_arg:%s", customClassName, customMethodName, customMethodArgName));
             prepareMethodToHook(customClassName, customMethodName, customMethodArgName, param, -1);
         } else {
-            String[] methodArray = readMethodFile("zhizi42.diycard.method.txt");
-            if (methodArray.length != 2) {
-                Utils.utilsLog(this, true, "read method error, pos method");
-                positionMethod(param, 0);
-                return;
-            }
-            prepareMethodToHook(methodArray[0], methodArray[1], "String", param, 0);
-
-            if (OSType == 0) {
-                methodArray = readMethodFile("zhizi42.diycard.method.1.txt");
-                if (methodArray.length != 2) {
-                    Utils.utilsLog(this, true, "read method error, pos method");
-                    positionMethod(param, 1);
-                    return;
+            if (OSType == 0 || OSType == 1) {
+                String[] methodArray = readMethodFile("zhizi42.diycard.method.txt");
+                if (methodArray.length == 2) {
+                    prepareMethodToHook(methodArray[0], methodArray[1], "String", param, 0);
+                } else {
+                    Utils.utilsLog(this, true, "read method 0 error, pos method");
+                    positionMethod(param, 0);
                 }
-                prepareMethodToHook(methodArray[0], methodArray[1], "String", param, 1);
 
-                if (superLandEnabled) {
-                    String[] hyperSuperLandMethodArray = readMethodFile("zhizi42.diycard.HyperSuperLand.method.txt");
-                    if (hyperSuperLandMethodArray.length != 2) {
-                        Utils.utilsLog(this, "read super land method error, pos method");
-                        positionMethod(param, 10);
-                        return;
+                if (OSType == 0) {
+                    methodArray = readMethodFile("zhizi42.diycard.method.1.txt");
+                    if (methodArray.length == 2) {
+                        prepareMethodToHook(methodArray[0], methodArray[1], "String", param, 1);
+                    } else {
+                        Utils.utilsLog(this, true, "read method 1 error, pos method");
+                        positionMethod(param, 1);
                     }
-                    prepareMethodToHook(hyperSuperLandMethodArray[0], hyperSuperLandMethodArray[1], "com.miui.tsmclient.entity.CardInfo", param, 10);
-                    Utils.utilsLog(this, "hook hyper os super land succ");
+
+                    if (superLandEnabled) {
+                        String[] hyperSuperLandMethodArray = readMethodFile("zhizi42.diycard.HyperSuperLand.method.txt");
+                        if (hyperSuperLandMethodArray.length == 2) {
+                            prepareMethodToHook(hyperSuperLandMethodArray[0], hyperSuperLandMethodArray[1], "com.miui.tsmclient.entity.CardInfo", param, 10);
+                        } else {
+                            Utils.utilsLog(this, true, "read super land method error, pos method");
+                            positionMethod(param, 10);
+                        }
+                    }
                 }
+            } else if (OSType == 2) {
+                prepareMethodToHook("com.meizu.mznfcpay.model.BaseCardItem", "largeIconUrl", "", param, 0);
+                prepareMethodToHook("com.meizu.mznfcpay.model.BaseCardItem", "smallIconUrl", "", param, 1);
             }
         }
     }
 
     public void positionMethod(PackageReadyParam param, int methodNum) {
+        if (dexKitBridge == null) {
             ApplicationInfo appInfo = param.getApplicationInfo();
             String apkPath = appInfo.sourceDir;
-            try (DexKitBridge dexKitBridge = DexKitBridge.create(apkPath)) {
-                MethodDataList methodDataList;
-                if (OSType == 0) {
-                    if (methodNum == 0) {
-                        methodDataList = dexKitBridge.findClass(FindClass
+            dexKitBridge = DexKitBridge.create(apkPath);
+        }
+        try {
+            MethodDataList methodDataList;
+            if (OSType == 0) {
+                if (methodNum == 0) {
+                    methodDataList = dexKitBridge.findClass(FindClass
+                            .create()
+                            .searchPackages("com.miui.tsmclient.util")
+                            .matcher(
+                                    ClassMatcher
+                                            .create()
+                                            .source("CustomGlideUrl.java")
+                            )
+                    ).findMethod(FindMethod
+                            .create()
+                            .matcher(MethodMatcher
+                                    .create()
+                                    .paramCount(1)
+                                    .paramTypes(String.class)
+                                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                                    .returnType(Object.class)
+                            )
+                    );
+                } else if (methodNum == 1) {
+                    methodDataList = dexKitBridge.findClass(FindClass
+                            .create()
+                            .searchPackages("com.bumptech.glide")
+                            .matcher(
+                                    ClassMatcher.create()
+                                            .source("RequestManager.java")
+                            )
+                    ).findMethod(FindMethod
+                            .create()
+                            .matcher(MethodMatcher
+                                    .create()
+                                    .paramCount(1)
+                                    .paramTypes(String.class)
+                                    .modifiers(Modifier.PUBLIC)
+                                    .returnType(
+                                            "com.bumptech.glide",
+                                            StringMatchType.StartsWith
+                                    )
+                            )
+                    );
+                } else if (methodNum == 10) {//定位小米超级岛
+                    methodDataList = dexKitBridge.findClass(FindClass
+                            .create()
+                            .searchPackages("com.miui.tsmclient.util")
+                    ).findMethod(FindMethod.create()
+                            .matcher(MethodMatcher.create()
+                                    .paramCount(1)
+                                    .paramTypes("com.miui.tsmclient.entity.CardInfo")
+                                    .modifiers(Modifier.PRIVATE | Modifier.STATIC)
+                                    .returnType(String.class)
+                            )
+                    );
+                } else {
+                    return;
+                }
+            } else if (OSType == 1) {
+                methodDataList = dexKitBridge.findClass(FindClass
                                 .create()
-                                .searchPackages("com.miui.tsmclient.util")
                                 .matcher(
-                                        ClassMatcher
-                                                .create()
-                                                .source("CustomGlideUrl.java")
-                                )
-                        ).findMethod(FindMethod
+                        ClassMatcher
                                 .create()
-                                .matcher(MethodMatcher
-                                        .create()
-                                        .paramCount(1)
-                                        .paramTypes(String.class)
-                                        .modifiers(Modifier.PUBLIC | Modifier.STATIC)
-                                        .returnType(Object.class)
-                                )
-                        );
-                    } else if (methodNum == 1) {
-                        methodDataList = dexKitBridge.findClass(FindClass
-                                .create()
-                                .searchPackages("com.bumptech.glide")
-                                .matcher(
-                                        ClassMatcher.create()
-                                                .source("RequestManager.java")
-                                )
-                        ).findMethod(FindMethod
+                                .className("com.finshell.finui.widget.imageview.CircleNetworkImageView")))
+                        .findMethod(FindMethod
                                 .create()
                                 .matcher(MethodMatcher
                                         .create()
                                         .paramCount(1)
                                         .paramTypes(String.class)
                                         .modifiers(Modifier.PUBLIC)
-                                        .returnType(
-                                                "com.bumptech.glide",
-                                                StringMatchType.StartsWith
-                                        )
+                                        .returnType(ClassMatcher
+                                                .create()
+                                                .className(
+                                                StringMatcher.create(
+                                                        "com.bumptech.glide.integration.okhttp3",
+                                                        StringMatchType.StartsWith)
+                                        ))
                                 )
                         );
-                    } else if (methodNum == 10) {//定位小米超级岛
-                        methodDataList = dexKitBridge.findClass(FindClass.create()
-                                .searchPackages("com.miui.tsmclient.util")
-                        ).findMethod(FindMethod.create()
-                                .matcher(MethodMatcher.create()
-                                        .paramCount(1)
-                                        .paramTypes("com.miui.tsmclient.entity.CardInfo")
-                                        .modifiers(Modifier.PRIVATE | Modifier.STATIC)
-                                        .returnType(String.class)
-                                )
-                        );
-                    } else {
-                        return;
-                    }
-                } else if (OSType == 1) {
-                    methodDataList = dexKitBridge.findClass(FindClass
-                                    .create()
-                                    .matcher(
-                            ClassMatcher
-                                    .create()
-                                    .className("com.finshell.finui.widget.imageview.CircleNetworkImageView")))
-                            .findMethod(FindMethod
-                                    .create()
-                                    .matcher(MethodMatcher
-                                            .create()
-                                            .paramCount(1)
-                                            .paramTypes(String.class)
-                                            .modifiers(Modifier.PRIVATE)
-                                            .returnType(ClassMatcher
-                                                    .create()
-                                                    .className(
-                                                    StringMatcher.create(
-                                                            "com.bumptech.glide.integration.okhttp3",
-                                                            StringMatchType.StartsWith)
-                                            ))
-                                    )
-                            );
-                } else {
-                    return;
-                }
-                if (methodDataList.getSize() != 1) {
-                    Utils.utilsLog(this, true, String.format("pos target method result num not 1, OS Type:%s, method num:%s, positioning target method num is:%s", OSType, methodNum, methodDataList.getSize()));
-                    for (MethodData method:methodDataList) {
-                        Utils.utilsLog(this, true, String.format("class name:%s, method name:%s", method.getClassName(), method.getMethodName()));
-                    }
-                    return;
-                }
-                MethodData methodData = methodDataList.single();
-                Method method = methodData.getMethodInstance(param.getClassLoader());
-                DexMethod dexMethod = methodData.toDexMethod();
-                updateTargetHookName(dexMethod.getClassName(), dexMethod.getName(), methodNum);
-                startHook(method, methodNum);
-            } catch (NoSuchMethodException | NoResultException e) {
-                Utils.utilsLog(this, true, "positioning target method and hook still error, message:" + e);
+            } else {
+                return;
             }
+            if (methodDataList.getSize() != 1) {
+                Utils.utilsLog(this, true, String.format("pos target method result num not 1, OS Type:%s, method num:%s, positioning target method num is:%s", OSType, methodNum, methodDataList.getSize()));
+                for (MethodData method:methodDataList) {
+                    Utils.utilsLog(this, true, String.format("class name:%s, method name:%s", method.getClassName(), method.getMethodName()));
+                }
+                return;
+            }
+            MethodData methodData = methodDataList.single();
+            Method method = methodData.getMethodInstance(param.getClassLoader());
+            DexMethod dexMethod = methodData.toDexMethod();
+            Utils.utilsLog(this, String.format("position target method num %s succ, class name:%s, method name:%s", methodNum, dexMethod.getClassName(), dexMethod.getName()));
+            updateTargetHookName(dexMethod.getClassName(), dexMethod.getName(), methodNum);
+            startHook(method, methodNum);
+        } catch (NoSuchMethodException | NoResultException e) {
+            Utils.utilsLog(this, true, "positioning target method and hook still error, message:" + e);
+        }
     }
 
     public String replaceUrl(String url) {
-        Utils.utilsLog(this, "load image's url:" + url);//记录加载的图片链接到log
-        if (sharedPreferences.getBoolean("test_mode", false)) {
-            return "https://home.zhizi42.top:555/test_card.png";
-        }
+        updateCardUrlList(url);
 
-        if (showAllCard) {
-            updateCardUrlList(url);//如果是显示所有卡片就直接添加到应用数据
-        } else {
-            if (OSType == 0) {
-                if (! (url.contains("w270h480") || url.contains("/door-card-img/logo/") || url.contains("/Mibi/"))) {
-                    updateCardUrlList(url);//如果不是显示所有卡片，不是小图标才添加到数据
-                }
-            } else {
-                updateCardUrlList(url);
-            }
+        if (sharedPreferences.getBoolean("test_mode", false)) {
+            Utils.utilsLog(this, "test mode enabled, replace url to test image");
+            return "https://home.zhizi42.top:555/test_card.png";
         }
 
         String imageName = sharedPreferences.getString(url, "");//获取原卡面图片对应的diy卡面
@@ -440,17 +417,10 @@ public class Hook extends XposedModule {
             if (imageName.startsWith("https://") || imageName.startsWith("http://")) {
                 imageUrl = imageName;//如果是链接就直接设置为结果
             } else {
-                String imagePath;
-                if (OSType == 0) {
-                    imagePath = "/data/data/com.miui.tsmclient/files/images/" + imageName;
-                } else if (OSType == 1) {
-                    imagePath = "/data/data/com.finshell.wallet/files/images/" + imageName;
-                } else {
-                    return "";
-                }
+                String imagePath = Utils.getWalletPath(OSType) + "files/images/" + imageName;//如果是文件名字就加上图片文件夹路径再设置为结果
                 imageUrl = "file://" + imagePath;//如果是文件名字就加上file协议头和图片文件夹路径再设置为结果
                 //如果开启debug，判断本地diy图片文件是否存在
-                if (sharedPreferences.getBoolean("debug", false)) {
+                if (Utils.debug) {
                     File file = new File(imagePath);
                     if (file.exists()) {
                         Utils.utilsLog(this, "diy image file exist");
@@ -481,17 +451,35 @@ public class Hook extends XposedModule {
     }
 
     public void updateCardUrlList(String newCardUrl) {
+        Utils.utilsLog(this, "load image's url:" + newCardUrl);//记录加载的图片链接到log
+
+        if (OSType == 0) {
+            if (! showAllCard) {
+                if (newCardUrl.contains("w270h480") || newCardUrl.contains("/door-card-img/logo/") || newCardUrl.contains("/Mibi/")) {
+                    Utils.utilsLog(this, "this card url is small icon url, not add to card url list");
+                    return;//如果是小图标就不添加到数据
+                }
+            }
+        }
+
         Set<String> blackSet = sharedPreferences.getStringSet("black_card_url_set", new HashSet<>());//获取黑名单列表
         if (! blackSet.contains(newCardUrl)) {//如果不在黑名单里就添加到所有卡片列表
             if (writeSharedPreference != null) {
-                SharedPreferences.Editor editor = writeSharedPreference.edit();
                 Set<String> cardUrlSet = new HashSet<>(writeSharedPreference.getStringSet("all_card_url_set", new HashSet<>()));
+                if (cardUrlSet.contains(newCardUrl)) {
+                    Utils.utilsLog(this, "this card url is already in card url list");
+                    return;
+                }
                 cardUrlSet.add(newCardUrl);
+                SharedPreferences.Editor editor = writeSharedPreference.edit();
                 editor.putStringSet("all_card_url_set", cardUrlSet);
                 editor.apply();
+                Utils.utilsLog(this, "add card url to card url list succ");
             } else {
                 Utils.utilsLog(this, "when update card url, write shared pref is null");
             }
+        } else {
+            Utils.utilsLog(this, "this card url is in black list, not add to card url list");
         }
     }
 }

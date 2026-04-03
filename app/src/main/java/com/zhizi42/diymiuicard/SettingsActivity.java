@@ -135,9 +135,11 @@ public class SettingsActivity extends AppCompatActivity implements
                 });
             }
 
+            int OSType = Utils.checkOSType(requireContext());
+
             SwitchPreference SuperLandPreference = findPreference("super_land");
             if (SuperLandPreference != null) {
-                if (Utils.checkOSType(requireContext()) == 0) {
+                if (OSType == 0) {
                     SuperLandPreference.setVisible(true);
                 }
             }
@@ -204,7 +206,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 noMoneyPlanPreference.setOnPreferenceClickListener(preference -> {
                     new AlertDialog.Builder(requireContext())
                             .setTitle(R.string.settings_title_no_money_plan)
-                            .setMessage(R.string.settings_dialog_text_no_money)
+                            .setMessage(R.string.settings_no_money_dialog_text)
                             .setNegativeButton(R.string.settings_dialog_button_text_no_money_link, (dialogInterface, i) -> {
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NoMoneyPlan"));
                                 startActivity(intent);
@@ -218,7 +220,18 @@ public class SettingsActivity extends AppCompatActivity implements
             Preference deleteImageCachePreference = findPreference("delete_image_cache");
             if (deleteImageCachePreference != null) {
                 deleteImageCachePreference.setOnPreferenceClickListener(preference -> {
-                    Utils.clearCache(requireActivity());
+                    Utils.clearCache(requireContext());
+                    return true;
+                });
+            }
+
+            Preference clearHookCachePreference = findPreference("clear_hook_cache");
+            if (clearHookCachePreference != null) {
+                if (OSType != 2) {
+                    clearHookCachePreference.setVisible(true);
+                }
+                clearHookCachePreference.setOnPreferenceClickListener(preference -> {
+                    Utils.clearHookCache(requireContext());
                     return true;
                 });
             }
@@ -240,6 +253,7 @@ public class SettingsActivity extends AppCompatActivity implements
             Preference customHookPreference = findPreference("custom_hook");
             Preference devOptGroupPreference = findPreference("dev_opt");
             if (aboutPreference != null &&
+                    showAllCardsPreference != null &&
                     debugPreference != null &&
                     customHookPreference != null &&
                     devOptGroupPreference != null) {
@@ -248,6 +262,11 @@ public class SettingsActivity extends AppCompatActivity implements
                 devOptGroupPreference.setVisible(isOpen);
                 debugPreference.setVisible(isOpen);
                 customHookPreference.setVisible(isOpen);
+                if (OSType == 0) {
+                    showAllCardsPreference.setVisible(isOpen);
+                } else {
+                    showAllCardsPreference.setVisible(false);
+                }
 
                 aboutPreference.setLongClickListener(preference -> {
                     //连续长按4次就开启开发者选项，显示所有被隐藏项
@@ -269,7 +288,11 @@ public class SettingsActivity extends AppCompatActivity implements
                         preferencesPreferences.edit()
                                 .putBoolean("dev_mode_open", isOpenNow).apply();
                         devOptGroupPreference.setVisible(isOpenNow);
-                        showAllCardsPreference.setVisible(isOpenNow);
+                        if (OSType == 0) {
+                            showAllCardsPreference.setVisible(isOpenNow);
+                        } else {
+                            showAllCardsPreference.setVisible(false);
+                        }
                         debugPreference.setVisible(isOpenNow);
                         customHookPreference.setVisible(isOpenNow);
                     }

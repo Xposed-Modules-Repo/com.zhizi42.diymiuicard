@@ -1,7 +1,11 @@
 # DIY MIUI/HyperOS/ColorOS NFC卡片卡面
 自定义MIUI/HyperOS/ColorOS NFC卡片的卡面 可使用本地文件或http URL。
 
-支持官方MIUI未知-Hyper OS最新版（为小米智能卡版本24.07.23.1.f制作。其它小米系统使用相同的小米智能卡理论也支持），和ColorOS未知版本-最新版（为当前最新版ColorOS钱包5.44制作）。
+#### TODO:
+- 🔨 更好康的UI界面（使用kotlin+compose+miuix重构，需较长时间）
+- 📅 待LSPosed API102发布后，适配102并支持Flyme的交通卡和银行卡（门卡暂不考虑支持）
+
+支持官方MIUI未知-Hyper OS最新版（为小米智能卡版本24.07.23.1.f制作。其它小米系统使用相同的小米智能卡理论也支持），和ColorOS未知版本-最新版（为当前最新版ColorOS钱包5.46制作）。
 
 更新版本的钱包不代表不能用，但更新版本若钱包代码改动则有部分可能导致失效，若失效请联系开发者重新适配。
 

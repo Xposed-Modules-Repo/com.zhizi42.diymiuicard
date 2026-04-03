@@ -1,12 +1,12 @@
 package com.zhizi42.diymiuicard;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 
@@ -75,40 +75,49 @@ public class Utils {
         }
     }
 
-    public static void clearCache(Activity activity) {
-        new AlertDialog.Builder(activity)
+    public static void clearCache(Context context) {
+        new AlertDialog.Builder(context)
                 .setTitle(R.string.settings_clear_cache_dialog_title)
                 .setMessage(R.string.settings_clear_cache_dialog_text)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    Glide.get(activity).clearMemory();
-                    new Thread(() -> {
-                        int OSType = checkOSType(activity);
-                        Glide.get(activity).clearDiskCache();
-                        List<String> commandList = new ArrayList<>();
-                        commandList.add("rm -rf /data/data/com.zhizi42.diymiuicard/cache/*");
-                        if (OSType == 0) {
-                            commandList.add("am force-stop com.miui.tsmclient");
-                        } else if (OSType == 1) {
-                            commandList.add("am force-stop com.finshell.wallet");
-                        } else if (OSType == 2) {
-                            commandList.add("am force-stop com.meizu.mznfcpay");
+                    Glide.get(context).clearMemory();
+                    Glide.get(context).clearDiskCache();
+                    Toast.makeText(context,
+                                    R.string.clear_card_cache_succ,
+                                    Toast.LENGTH_SHORT)
+                            .show();
+                })
+                .show();
+    }
+    public static void clearHookCache(Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.settings_clear_hook_cache_dialog_title)
+                .setMessage(R.string.settings_clear_hook_cache_dialog_text)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                    int OSType = checkOSType(context);
+                    List<String> commandList = new ArrayList<>();
+                    if (OSType == 0) {
+                        commandList.add("am force-stop com.miui.tsmclient");
+                        commandList.add("rm -rf /data/data/com.miui.tsmclient/files/zhizi42.diycard.method.txt");
+                        commandList.add("rm -rf /data/data/com.miui.tsmclient/files/zhizi42.diycard.method.1.txt");
+                        if (PreferenceManager
+                                .getDefaultSharedPreferences(context)
+                                .getBoolean("super_land", false)) {
+                            commandList.add("rm -rf /data/data/com.miui.tsmclient/files/zhizi42.diycard.HyperSuperLand.method.txt");
                         }
-                        boolean succ = Utils.executeShell(commandList);
-                        activity.runOnUiThread(() -> {
-                            if (succ) {
-                                Toast.makeText(activity,
-                                                R.string.clear_card_cache_succ,
-                                                Toast.LENGTH_SHORT)
-                                        .show();
-                            } else {
-                                Toast.makeText(activity,
-                                                R.string.clear_card_cache_fail,
-                                                Toast.LENGTH_LONG)
-                                        .show();
-                            }
-                        });
-                    }).start();
+                    } else if (OSType == 1) {
+                        commandList.add("am force-stop com.finshell.wallet");
+                        commandList.add("rm -rf /data/data/com.finshell.wallet/files/zhizi42.diycard.method.txt");
+                    }
+                    boolean succ = Utils.executeShell(commandList);
+                    if (succ) {
+                        Toast.makeText(context,
+                                        R.string.clear_card_cache_succ,
+                                        Toast.LENGTH_SHORT)
+                                .show();
+                    }
                 })
                 .show();
     }
@@ -131,9 +140,26 @@ public class Utils {
             try {
                 context.getPackageManager().getPackageInfo("com.finshell.wallet", PackageManager.GET_META_DATA);
                 return 1;
-            } catch (PackageManager.NameNotFoundException ex) {
-                return -1;
+            } catch (PackageManager.NameNotFoundException e1) {
+                try {
+                    context.getPackageManager().getPackageInfo("com.meizu.mznfcpay", PackageManager.GET_META_DATA);
+                    return 2;
+                } catch (PackageManager.NameNotFoundException e2) {
+                    return -1;
+                }
             }
+        }
+    }
+
+    public static String getWalletPath(int OSType) {
+        if (OSType == 0) {
+            return "/data/data/com.miui.tsmclient/";
+        } else if (OSType == 1) {
+            return "/data/data/com.finshell.wallet/";
+        } else if (OSType == 2) {
+            return "/data/data/com.meizu.mznfcpay/";
+        } else {
+            return "";
         }
     }
 

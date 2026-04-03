@@ -32,7 +32,7 @@
     <string name="settings_title_donate">給開發者買咖啡</string>
     <string name="settings_title_no_money_plan">無錢計劃</string>
     <string name="donate_call_alipay_text">直接打開支付寶去捐贈</string>
-    <string name="settings_dialog_text_no_money">本應用已加入 無錢計劃，承諾一直免費使用且無收費附加功能。</string>
+    <string name="settings_no_money_dialog_text">本應用已加入 無錢計劃，承諾一直免費使用且無收費附加功能。</string>
     <string name="settings_dialog_button_text_no_money_link">打開無錢計劃網址</string>
     <string name="settings_open_qq_fail">打開QQ失敗，請檢查手機是否有安裝最新版QQ</string>
     <string name="input_image_tips_text">點擊圖片來選擇，點擊下面的添加圖片按鈕來添加圖片（需要root權限），長按圖片來刪除圖片，點擊“清空已選”來還原原圖</string>
@@ -47,8 +47,8 @@
     <string name="select_image_save_copy_error_toast">複製文件失敗，請確定授予root權限後聯繫開發者</string>
     <string name="select_image_tips">點擊確認添加會添加當前預覽的圖片樣式到應用卡包圖片庫。\n目前一鍵添加卡面標誌功能僅支持京津冀互聯互通卡、上海公共交通卡 交通聯合版、泉城通、銀川交通一卡通。\n因作者技術和精力有限，不會提供所有交通卡卡面和其它卡卡面。\n如您有能力，可自行取出想要的卡面標誌圖片交給作者，作者會添加到應用。</string>
     <string name="select_image_button_tips">相關說明</string>
-    <string name="settings_clear_cache_dialog_title">是否清除緩存？</string>
-    <string name="settings_clear_cache_dialog_text">是否確認清除自己和小米智能卡的圖片加載緩存並強行停止小米智能卡？\n清除後可能會修正圖片加載錯誤，但會延長加載時間。\n清除後請重啟本應用以生效。</string>
+    <string name="settings_clear_cache_dialog_title">是否清除模塊圖片緩存？</string>
+    <string name="settings_clear_cache_dialog_text">是否確認清除自己的圖片緩存？\n清除後可能會修正圖片加載錯誤。\n清除後請重啟本應用以生效。</string>
     <string name="select_image_done_dialog_title">添加圖片完成</string>
     <string name="select_image_done_dialog_text">添加圖片完成！\n若卡包卡片卡面顯示錯誤，可能是因為您輸入了與之前相同的文件名，到設置清理緩存即可更新。</string>
     <string name="select_image_done_dialog_clear_cache">馬上清除緩存</string>
@@ -57,11 +57,14 @@
     <string name="no_card_app_installed_title">未找到適配的卡包APP</string>
     <string name="clear_card_cache_succ">清除緩存成功</string>
     <string name="clear_card_cache_fail">清除緩存失敗</string>
-    <string name="settings_clear_card_cache">清除卡面圖片緩存</string>
+    <string name="settings_title_clear_card_cache">清除模塊圖片緩存</string>
     <string name="settings_title_blacklist">主界面卡面黑名單</string>
     <string name="settings_summary_blacklist">編輯不顯示在主界面的卡面名單</string>
     <string name="activity_title_black_list">主界面卡面黑名單</string>
     <string name="description">修改HyperOS和ColorOS卡包卡面圖片</string>
     <string name="settings_title_FAQ">常見問題</string>
     <string name="settings_FAQ_msg">常見問題：\n模塊主界面沒有圖片：請確認LSP裡模塊已啟用並勾選作用域，強行停止卡包，在卡包里加載完圖片\n替換了圖片但不生效：如上若仍不生效請確認/data/data/卡包包名/files/images下存在選擇的圖片文件\n更改了替換圖片但仍顯示舊圖片：設置裡清除卡面圖片緩存\n更新模塊後：請強行停止卡包後再重啟卡包和應用\n若確認模塊是最新版，已重啟卡包和應用仍有故障：請加群反饋</string>
+    <string name="settings_title_clear_hook_cache">清除hook點緩存</string>
+    <string name="settings_clear_hook_cache_dialog_title">是否清除hook點緩存？</string>
+    <string name="settings_clear_hook_cache_dialog_text">是否清除hook點緩存？</string>
 </resources>
